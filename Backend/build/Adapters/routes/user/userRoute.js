@@ -1,0 +1,24 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const userController_1 = require("../../controllers/user/userController");
+const userInteractor_1 = require("../../../Interactors/userInteractor");
+const userRepository_1 = require("../../../repositories/userRepository");
+const otp_expire_handler_1 = require("../../middlewares/otp-expire-handler");
+const verifyToken_1 = require("../../middlewares/verifyToken");
+const multer_1 = __importDefault(require("../../../Utils/multer"));
+const userRouter = express_1.default.Router();
+const repository = new userRepository_1.userRepository();
+const interactor = new userInteractor_1.userInteractor(repository);
+const controller = new userController_1.userController(interactor);
+userRouter.post('/login/:type', controller.authenticateUser.bind(controller));
+userRouter.post('/verifyOtp', otp_expire_handler_1.otpValidator.validateUserOtp, controller.verifyOtp.bind(controller));
+userRouter.post('/logout', controller.logout.bind(controller));
+userRouter.post('/profile', verifyToken_1.verifyAccessToken, controller.profile.bind(controller));
+userRouter.put('/editProfile', verifyToken_1.verifyAccessToken, multer_1.default.single('profileImage'), controller.editProfile.bind(controller));
+userRouter.post('/fetchHotels', controller.getHotels.bind(controller));
+userRouter.post('/filterHotels', controller.filterHotels.bind(controller));
+exports.default = userRouter;
