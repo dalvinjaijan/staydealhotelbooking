@@ -1,5 +1,6 @@
 import { Request as ExpressRequest,Response } from 'express';
 import { Session } from 'express-session';
+import { dataForBookingHotel } from './iUserRepositoryInterface';
 
 export interface userInteractorInterface{
     sendOtp(email:string):Promise<string>
@@ -10,6 +11,10 @@ export interface userInteractorInterface{
     getUserByEmail(email:string):Promise<string>
     getHotels(data:object):Promise<any>
     getFilteredHotels(data:object):Promise<any>
+    fetchHotel(data:dataForBookingHotel):Promise<any>
+    fetchHotelDetails(data:dataForBookingHotel):Promise<any>
+    bookRoom(bookingDetails:bookingHotelDetails):Promise<any>
+    myOrders(type:string,userId:string):Promise<any>
 }
 
 
@@ -32,4 +37,30 @@ interface CustomSession extends Session {
 export interface CustomRequest extends ExpressRequest {
   session: CustomSession;
   File?:Express.Multer.File
+}
+export interface bookingHotelDetails{
+  lngLat:{
+      lat:number,
+      lng:number
+  },
+  numberOfRooms:number,
+  totalGuests:number,
+  checkIn:Date,
+  checkOut:Date  ,
+  searchTerm:string,
+  guestNumber:number,
+  hotelName:string,
+  hotelAddress:string,
+  roomPrice:number,
+  totalAmount:number,
+  roomType:string,
+  name:string,
+  email:string,
+  phone:string,
+  country:string,
+  hotelId:string,
+  roomId:string,
+  paymentId:string,
+  paymentMethod:string,
+  userId:string
 }

@@ -14,6 +14,9 @@ import { PersistGate } from 'redux-persist/integration/react'
 
 import { ReactNode } from 'react';
 import PlacesContextFunction from './context/placesContext.tsx'
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from '@stripe/react-stripe-js'
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -57,8 +60,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <PersistGate loading={null} persistor={persistor}>
       <ErrorBoundary>
         <BrowserRouter>
+        <Elements stripe={stripePromise}>
             <ToastContainer pauseOnHover={false} position="bottom-right"/>
                 <App />
+                </Elements>
         </BrowserRouter>
       </ErrorBoundary>
     </PersistGate>

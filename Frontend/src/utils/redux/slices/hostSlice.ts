@@ -149,8 +149,8 @@ const hostSlice=createSlice({
         })
 
         .addCase(editHotelDetails.fulfilled,(state,action)=>{
-            console.log("payload",action)
-            state.hotels=action.payload?.response.hotels
+            console.log("payload OF editHotelDetails",action.payload?.response)
+            // state.hotels=action.payload?.response
             state.message=action.payload?.message
             
         })

@@ -1,7 +1,7 @@
 
 
-import { userInteractorInterface } from "../Adapters/interfaces/userInterface/iUserInteractor";
-import { filterHotelsData, searchHotelsData, userRepositoryInterface } from "../Adapters/interfaces/userInterface/iUserRepositoryInterface";
+import { bookingHotelDetails, userInteractorInterface } from "../Adapters/interfaces/userInterface/iUserInteractor";
+import { dataForBookingHotel, filterHotelsData, searchHotelsData, userRepositoryInterface } from "../Adapters/interfaces/userInterface/iUserRepositoryInterface";
 import { generateAcessToken, generateRefreshToken } from "../Utils/jwt";
 import { sendMail } from "../Utils/nodemailer";
 import jwt from 'jsonwebtoken'
@@ -102,6 +102,49 @@ export class userInteractor implements userInteractorInterface{
             try {
                 const response=await this.repository.fetchFilteredHotels(data)
                 return response
+            } catch (error) {
+                throw error
+            }
+        }
+
+        async fetchHotel(data:dataForBookingHotel): Promise<any> {
+            try {
+                const response=await this.repository.getHotelDetails(data)
+                return response
+            } catch (error) {
+                throw error
+            }
+        }
+
+        async fetchHotelDetails(data: dataForBookingHotel): Promise<any> {
+            try {
+                const response=await this.repository.fetchHotelDetails(data)
+                return response
+            } catch (error) {
+                throw error
+            }
+        }
+
+        async bookRoom(bookingDetails: bookingHotelDetails): Promise<any> {
+            try {
+
+                
+                const response=await this.repository.reserveRoom(bookingDetails)
+                return response
+            } catch (error) {
+                throw error
+            }
+        }
+
+       async myOrders(type: string, userId: string): Promise<any> {
+            try {
+                if(type==="upcoming"){
+                    const response=await this.repository.getUpcomingOrders(userId)
+                    return response
+                }else{
+                    const response=await this.repository.getCompletedOrders(userId)
+                    return response
+                }
             } catch (error) {
                 throw error
             }

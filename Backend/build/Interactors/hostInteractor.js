@@ -75,9 +75,9 @@ class hostInteractor {
     async addHotelDetails(data, hotelPhotos, roomPhotos) {
         try {
             const { hostid } = data;
-            console.log("host id", data);
-            const hostDetails = await this.repository.findHostById(hostid);
-            const { message, newlyAddedHotel } = await this.repository.addHotel(data, hotelPhotos, roomPhotos, hostDetails);
+            // console.log("host id",data)
+            // const hostDetails=await this.repository.findHostById(hostid)
+            const { message, newlyAddedHotel } = await this.repository.addHotel(data, hostid, hotelPhotos, roomPhotos);
             if (message !== "Request for adding hotel is sent") {
                 throw new errorHandling_1.customError('error while adding hotel', 401);
             }

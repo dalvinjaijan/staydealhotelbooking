@@ -91,10 +91,10 @@ export class hostInteractor implements hostInteractorInterface{
     async addHotelDetails(data: any, hotelPhotos: string[], roomPhotos: { [key: string]: string[] }): Promise<any> {
       try {
         const {hostid}=data
-        console.log("host id",data)
-      const hostDetails=await this.repository.findHostById(hostid)
+        // console.log("host id",data)
+      // const hostDetails=await this.repository.findHostById(hostid)
       
-        const {message,newlyAddedHotel}=await this.repository.addHotel(data,hotelPhotos,roomPhotos,hostDetails)
+        const {message,newlyAddedHotel}=await this.repository.addHotel(data,hostid,hotelPhotos,roomPhotos)
         if(message!=="Request for adding hotel is sent"){
           throw new customError('error while adding hotel', 401)
         }

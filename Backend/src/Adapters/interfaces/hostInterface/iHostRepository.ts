@@ -1,11 +1,11 @@
-import { Types } from "mongoose"
+import { ObjectId, Types } from "mongoose"
 import { Document } from 'mongoose';
 
 export interface hostRepositoryInterface{
    
      createHost(hostDetails:any):Promise<Types.ObjectId>
      findHostByEmail(email: string): Promise<any>
-     addHotel(data:any,hotelPhotos:string[],roomPhotos: { [key: string]: string[] },hostDetails:HostDocument):Promise<any>
+     addHotel(data:any,hostId:string,hotelPhotos:string[],roomPhotos: { [key: string]: string[] }):Promise<any>
     findHostById(hostid:string):Promise<HostDocument>
     fetchHotels(hostId:any):Promise<any>
     addingEditedhotelData(editedData:any,hostId:string):Promise<any>
@@ -13,13 +13,13 @@ export interface hostRepositoryInterface{
 
 
 
-export interface Address {
-    buildingNo: string | null;
-    locality: string | null;
-    district: string | null;
-    state: string | null;
-    pincode: string | null;
-}
+// export interface Address {
+//     buildingNo: string | null;
+//     locality: string | null;
+//     district: string | null;
+//     state: string | null;
+//     pincode: string | null;
+// }
 
 export interface RoomCategory extends Types.Subdocument {
     roomType: string | null;
@@ -45,6 +45,7 @@ export interface Hotel extends Types.Subdocument {
     roomPolicies: RoomPolicy | null;
     hotelRules: string[];
     cancellationPolicy: string | null;
+    
 }
 
 export interface HostInterface {
@@ -54,7 +55,20 @@ export interface HostInterface {
     phone: number | null;
     profileImage: string | null;
     password: string;
-    hotels: Types.DocumentArray<Hotel>;
+    hotels: Types.ObjectId[];
 }
+export interface EditedData {
+    hotelName: string;
+    totalNoOfRooms: number;
+    amenities: string[];
+    hotelPhoto: string[];
+    hotelRules: string[];
+    cancellationPolicy: string;
+    isHotelListed: string;
+    roomPolicies?: { checkIn: string; checkOut: string } | null;
+    address?: any;
+    location?: { type: string; coordinates: number[] } | null;
+    editedData?: EditedData | null; // Add this line
+  }
 
 export interface HostDocument extends HostInterface, Document {}

@@ -18,6 +18,18 @@ userRouter.post('/profile',verifyAccessToken,controller.profile.bind(controller)
 userRouter.put('/editProfile',verifyAccessToken,upload.single('profileImage'),controller.editProfile.bind(controller))
 userRouter.post('/fetchHotels',controller.getHotels.bind(controller))
 userRouter.post('/filterHotels',controller.filterHotels.bind(controller))
+userRouter.post('/searchHotel',controller.searchHotel.bind(controller))
+userRouter.post('/changeBookingDetails',controller.changeBookingDetails.bind(controller))
+userRouter.post('/create-checkout-session',controller.createPayment.bind(controller))
+userRouter.post('/bookRoom',controller.bookRoom.bind(controller))
+
+
+userRouter.get('/myBooking',controller.myBooking.bind(controller))
+
+
+
+
+
 
 
 

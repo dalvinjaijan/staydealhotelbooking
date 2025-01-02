@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Header from './Header'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '../../../utils/redux/store'
@@ -6,10 +6,14 @@ import { toast } from 'react-toastify'
 import { resetHotelSearchs, resetStates, setLocation, sortHotelsByPrice } from '../../../utils/redux/slices/userSlice'
 import PlacesAutoComplete from '../host/PlacesAutoComplete'
 import { PlacesContext } from '../../../context/placesContext'
-import { fetchFilteredHotels, searchHotel, selectCity } from '../../../utils/axios/api'
+import { fetchFilteredHotels, searchHotel, searchHotelforBooking, selectCity } from '../../../utils/axios/api'
 import { useNavigate } from 'react-router-dom'
 import { Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption } from "@reach/combobox";
-import { IoSearchOutline } from "react-icons/io5";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import './style.css'
+import { IoSearch } from "react-icons/io5";
+import HotelSearchBar from './HotelSearchBar'
 
 
 
@@ -17,20 +21,18 @@ import { IoSearchOutline } from "react-icons/io5";
 const Home = () => {
   const dispatch: AppDispatch = useDispatch<AppDispatch>()
   const { message, error, nearByHotels, selectedLoc, lngLat, hotelSearchResult } = useSelector((state: RootState) => state.user)
-  // console.log("neabyHotels",nearByHotels)
+
   const [selectedRoomTypes, setSelectedRoomTypes] = useState<string[]>([]);
   const [selectedOtherFilters, setSelectedOtherFilters] = useState<string[]>([]);
-  // const [filteredSort,setFilteredSort] = useState<[]|null>([])
+
   const navigate = useNavigate()
 
-  const [showLocationPopup, setShowLocationPopup] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [selectedCity, setSelectedCity] = useState<string>('');
-  const isLoaded = useContext(PlacesContext)
   const [searchTerm, setSearchTerm] = useState('');
   const [debounceTimeout, setDebounceTimeout] = useState(null)
-  // const [suggestions, setSuggestions] = useState([]);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
 
  useEffect(()=>{
   setLoading(false)
@@ -116,25 +118,11 @@ const Home = () => {
 
     }
   }, [message, error, dispatch])
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+
   const [latLng, setLatLng] = useState<{ lat: number; lng: number } | null>(null);
-  console.log("latitude", latLng)
 
-  const handleLocationSelect = (address: string, latLng: { lat: number, lng: number }) => {
-    setSelectedLocation(address);
-    setLatLng(latLng);
-    setShowLocationPopup(false)
 
-  };
-  const cities = [
-    { name: 'Kochi', icon: '/src/assets/kochi.png' },
-    { name: 'Mumbai', icon: '/src/assets/mumbai.png' },
-    { name: 'Bengaluru', icon: '/src/assets/banglore.png' },
-    { name: 'Delhi', icon: '/src/assets/delhi.png' },
-    { name: 'Chennai', icon: '/src/assets/chennai.png' },
-    { name: 'Kolkata', icon: '/src/assets/kolkata.png' },
 
-  ];
 
   const hotelDetail = (index: number) => {
     if (nearByHotels) {
@@ -151,80 +139,85 @@ const Home = () => {
     );
     if (selectedHotel) {
       console.log("Details of hotel:", selectedHotel);
-      navigate(`/hotelDetails?hotelId=${selectedHotel.hotelId}`);
+      setSearchTerm(hotelName)
+    
     }
   };
 
-  const handleCitySelect = (city: string) => {
-    setSelectedCity(city);
-    setLatLng(latLng);
-    setShowLocationPopup(false); // Close the popup after selecting a city
 
+  //date checkIn
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1)
+  const [checkIn, setCheckIn] = useState<Date | null>(today);
+  const [checkOut, setCheckOut] = useState<Date | null>(tomorrow);
+
+  const handleCheckInChange = (date: Date | null) => {
+    setCheckIn(date);
+    if (checkOut && date && date >= checkOut) {
+      setCheckOut(null); // Reset check-out if it conflicts with check-in
+    }
   };
-  useEffect(() => {
-    if (latLng) {
-      dispatch(selectCity(latLng))
-    }
-  }, [latLng])
-  useEffect(() => {
-    if (selectedLocation) {
-      setShowLocationPopup(false)
-    }
-  })
 
-  useEffect(() => {
-    if (selectedLocation) {
-      console.log("selectedLocation", selectedLocation, typeof selectedLocation)
+  const handleCheckOutChange = (date: Date | null) => {
+    setCheckOut(date);
+  };
 
-      let city = selectedLocation.split(',')[0].trim()
-      dispatch(setLocation(city))
+
+  const getMaxDate = () => {
+    const baseDate = checkIn || today; // Use checkIn if available; otherwise, use today
+    const maxDate = new Date(baseDate);
+    maxDate.setMonth(maxDate.getMonth() + 6); // Add 6 months to the base date
+    return maxDate;
+  };
+  //Room and guest number changes
+  const [popupForRoom,setPopupForRoom]=useState<boolean>(false)
+  const [guestNumber,setGuestNumber]=useState<number[]>([1])
+  const [numberOfRooms,setNumberOfRooms]=useState<number>(1)
+  const handleRoomNumbers=()=>{
+  setPopupForRoom(true)
+  }
+
+  const incrementGuest=(index:number)=>{
+    setGuestNumber((prev)=>
+     prev.map((guest,i)=>i===index && guest<=2 ? guest +1:guest)
+    )
+  }
+
+  const decrementGuest=(index:number)=>{
+    setGuestNumber((prev)=>
+    prev.map((guest,i)=>i===index && guest > 1 ? guest-1:guest)
+  )}
+  const addRoom=()=>{
+    if (numberOfRooms < 6) { // Max 6 rooms allowed
+      setNumberOfRooms((prev) => prev + 1);
+      setGuestNumber((prev) => [...prev, 1]); // Add default 1 guest for the new room
     }
-  }, [selectedLocation])
+
+  }
+  const deleteRoom=()=>{
+    if (numberOfRooms > 1) { // Minimum 1 room required
+      setNumberOfRooms((prev) => prev - 1);
+      setGuestNumber((prev) => prev.slice(0, -1)); // Remove the last room's guest count
+    }
+  }
+
+  const totalGuests=guestNumber.reduce((sum,noOfGuest)=>sum+noOfGuest,0)
+
+  //search hotel for booking
+
+  const searchHotelForBooking=(numberOfRooms:number,totalGuests:number,checkIn:Date,checkOut:Date,searchTerm:string)=>{
+    console.log("searchTerm",searchTerm,totalGuests)
+    dispatch(searchHotelforBooking({lngLat,numberOfRooms,totalGuests,checkIn,checkOut,searchTerm}))
+    navigate('/hotelDetailedPage')
+    
+  }
 
  
   
   return (
     <>
       <Header />
-
-      {showLocationPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-navbar-green text-white p-8 rounded-lg w-2/3 max-w-3xl">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Select Your City</h2>
-              <button
-                className="text-white hover:text-red-500 text-2xl"
-                onClick={() => setShowLocationPopup(false)}
-              >
-                &times;
-              </button>
-            </div>
-            {isLoaded ? (
-              <PlacesAutoComplete onSelectLocation={handleLocationSelect} />
-            ) : (
-              <div>Loading...</div> // Optional loading state
-            )}
-
-            <div className="grid grid-cols-4 gap-6 mt-10">
-              {cities.map((city) => (
-                <div
-                  key={city.name}
-                  className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${selectedCity === city.name ? 'text-yellow-500' : ''
-                    }`}
-                  onClick={() => handleCitySelect(city.name)}
-                >
-                  <img
-                    src={city.icon}
-                    alt={`${city.name} icon`}
-                    className="h-16 w-16 mb-2"
-                  />
-                  <span className="text-sm">{city.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
       <div className="mt-14">
         {/* {nearByHotels && nearByHotels?.length > 0 ? ( */}
         <div className="flex flex-col lg:flex-row gap-6">
@@ -274,51 +267,17 @@ const Home = () => {
           </aside>
 
           {/* Hotels Section */}
-          <div className="flex-1">
-            <div className="flex justify-between items-center mb-4">
+          <div className="flex-1" onClick={()=>{setPopupForRoom(false);}}>
+                <HotelSearchBar />
+              <div className="flex justify-between items-center mb-4">
+
               <div>
-                {/* <input
-        type="text"
-        placeholder="Search hotels"
-        value={searchTerm}
-        onChange={handleInputChange}
-      /> */}
-                {/* Render the suggestions as a dropdown list */}
-                {/* {hotelSearchResult.length > 0 && (
-        <ul style={{ border: '1px solid #ccc', marginTop: '8px' }}>
-          {hotelSearchResult.map((hotel:any) => (
-            <li key={hotel.id}>{hotel.hotelName+","+hotel.address}</li>
-          ))}
-        </ul>
-      )}     */}
-                <Combobox onSelect={handleSelect}>
+              {message === "No hotels found" ? <h3 className="text-xl font-semibold flex flex-col">Oops hotel not found</h3> :
+                <h3 className="text-xl font-semibold flex flex-col">{`Hotels in ${selectedLoc}`}</h3>
 
-                  <ComboboxInput
-                    value={searchTerm}
-                    onChange={handleInputChange}
-                    // disabled={!ready}
-                    placeholder="Search for hotels"
-                    className="mt-8 px-3 py-1 border border-navbar-green rounded-xl shadow-sm w-96 text-black "
-                  />
-                 
-                  <ComboboxPopover className="bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-50">
-                    {hotelSearchResult.length > 0 ? (
-                      <ComboboxList className="max-h-48 overflow-y-auto">
+              }
 
-                        {hotelSearchResult.map((hotel: any) => (
-                          <ComboboxOption key={hotel.id} value={hotel.hotelName + "," + hotel.address}
-                            className="p-2 border-b border-gray-100 last:border-none cursor-pointer hover:bg-gray-100"
-                          />
-                        ))}
-                      </ComboboxList>
-                    ) : loading ? <p>Loading...</p> :(<p>
-                      No hotels found
-                    </p>)}
-
-                  </ComboboxPopover>
-
-                </Combobox>
-              </div>
+            </div>
 
               <div className="text-sm">
                 <label htmlFor="sort" className="mr-2">Sort by:</label>
@@ -327,17 +286,13 @@ const Home = () => {
                   <option value="low-to-high">Price Low to High</option>
                 </select>
               </div>    
-            </div>
-            <div>
-              {message === "No hotels found" ? <h3 className="text-xl font-semibold flex flex-col">Oops hotel not found</h3> :
-                <h3 className="text-xl font-semibold flex flex-col">{`Hotels in ${selectedLoc}`}</h3>
-
-              }
-
+           
+           
             </div>
 
             <div className="grid grid-cols-1  gap-6">
               {nearByHotels && nearByHotels.map((hotel: any, index) => (
+        
 
                 <div key={index} className="relative bg-white rounded-lg overflow-hidden shadow-lg flex">
 
@@ -378,9 +333,9 @@ const Home = () => {
                           onClick={() => hotelDetail(index)}>
                           View Details
                         </button>
-                        <button className="bg-indigo-500 text-white px-4 py-2 rounded-md">
+                        {/* <button className="bg-indigo-500 text-white px-4 py-2 rounded-md">
                           Book Now
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   </div>

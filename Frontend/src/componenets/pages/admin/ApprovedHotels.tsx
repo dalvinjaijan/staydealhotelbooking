@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { blockHotelRequest, getApprovedHotels } from '../../../utils/axios/AdminApi/AdminApi'
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import Swal from "sweetalert2"
+
 
 const ApprovedHotels = () => {
   const dispatch: AppDispatch = useDispatch<AppDispatch>();
@@ -18,6 +20,26 @@ const ApprovedHotels = () => {
       toast.error(message)
     }
   }, [dispatch,message]);
+  const handleBlock=(hostId:string,hotelId:string,hotelName:string)=>{
+    Swal.fire({
+      title: `Block ${hotelName}?`,
+      text: `Are you sure you want to block this hotel?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33", // Unblock: Blue, Block: Red
+      cancelButtonColor: "#aaa",
+      confirmButtonText:  "Yes, Block",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(blockHotelRequest({hostId,hotelId}))
+          
+          if (message === "hotel blocked") {
+            toast.error(message);
+          }
+        
+      }
+    });
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -67,7 +89,8 @@ const ApprovedHotels = () => {
                 <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                 onClick={
                   
-                    ()=> dispatch(blockHotelRequest({hostId: hotel.hostId, hotelId: hotel.hotelId}))
+                  ()=> handleBlock(hotel.hostId,hotel.hotelId,hotel.hotelName)
+
                    
                  }>
                   Block

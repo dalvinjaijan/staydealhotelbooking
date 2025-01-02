@@ -138,7 +138,7 @@ const HotelDetails = () => {
           />
           <div className="flex-1">
             <h3 className="text-xl font-semibold">{category.roomType}</h3>
-            <p className="text-sm text-gray-600">{category.roomSize} sqft</p>
+            <p className="text-sm text-gray-600">{category.roomSize} </p>
             <div className="mt-2 flex gap-4">
               {Array.isArray(category.amenities) &&
                 category.amenities.map((item: string, i: number) => (

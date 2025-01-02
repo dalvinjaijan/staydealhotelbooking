@@ -49,7 +49,7 @@ const HostHome = () => {
       <div className='flex justify-between items-center mt-24 px-10'>
         <h2 className='text-2xl font-semibold'>Listed Properties</h2>
         <button
-          className='bg-light-green text-white px-3 py-2 rounded-md'
+          className='bg-heading-green text-white  hover:bg-navbar-green"  px-3 py-2 rounded-md'
           onClick={() => navigate('/host/addHotel')}
         >
           Add new property

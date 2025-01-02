@@ -7,3 +7,27 @@
   .scroll-element::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge */
   }
+
+  .booking-success-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-image: url('path/to/your/background-image.jpg'); /* Replace with your desired image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #fff; /* Light text color for better contrast */
+    font-family: Arial, sans-serif;
+  }
+  
+  /* h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  div {
+    margin-bottom: 1rem;
+  } */
+

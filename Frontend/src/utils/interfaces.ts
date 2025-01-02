@@ -129,3 +129,86 @@ export interface AdminAuthstate{
     message:string|null
     users:any[]|null
 }
+
+export interface dataForBookingHotel{
+    lngLat:{
+        lat:number,
+        lng:number
+    },
+    numberOfRooms:number,
+    totalGuests:number,
+    checkIn:Date,
+    checkOut:Date  ,
+    searchTerm:string,
+    guestNumber:number,
+    hotelName:string,
+    hotelAddress:string,
+    roomPrice:number,
+    totalAmount:number,
+    roomType:string,
+    name:string,
+    email:string,
+    phone:string,
+    country:string,
+    hotelId:string,
+    roomId:string,
+    paymentId:string,
+    paymentMethod:string,
+    userId:string
+}
+
+export interface hotelSearchResult {
+    address: string;
+    amenities: string[];
+    cancellationPolicy: string;
+    hotelId: string;
+    hotelName: string;
+    hotelPhoto: string[];
+    hotelRules: string[];
+    location: {
+      coordinates: [number, number]; // Assuming coordinates are in [longitude, latitude] format
+    };
+    roomCategories: RoomCategory[];
+    roomPolicies: {
+      checkIn: string;
+      checkOut: string;
+      _id: string;
+    };
+    totalNoOfRooms: number;
+  }
+  
+  export interface RoomCategory {
+    _id: string;
+    roomType: string;
+    roomSize: string;
+    noOfRooms: number;
+    roomPrice: number;
+    roomAmenities: string[];
+    roomPhotos: string[];
+    availableRooms:number,
+    isAvailable:boolean
+  }
+
+export  interface GuestDetails {
+    name: string;
+    email: string;
+    phone: number;
+    country: string;
+  }
+  
+  export interface reservationDetailsType {
+    bookingId: string;
+    userId: string;
+    hotelId: string;
+    roomId: string;
+    roomNumbers: string[];
+    noOfRooms: number;
+    noOfGuests: number;
+    checkIn: string; // ISO date string
+    checkOut: string; // ISO date string
+    totalAmount: number;
+    paymentMethod: string;
+    paymentId: string | null;
+    GuestDetails: GuestDetails;
+    
+  }

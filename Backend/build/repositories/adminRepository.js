@@ -7,14 +7,18 @@ exports.adminRepository = void 0;
 const adminSchema_1 = __importDefault(require("../db/models/adminSchema"));
 const hostSchema_1 = __importDefault(require("../db/models/hostSchema"));
 const userSchema_1 = __importDefault(require("../db/models/userSchema"));
+const hotelSchema_1 = __importDefault(require("../db/models/hotelSchema"));
+const roomSchema_1 = __importDefault(require("../db/models/roomSchema"));
 class adminRepository {
     adminDb;
     hostDb;
     userDb;
+    hotelDb;
     constructor() {
         this.adminDb = adminSchema_1.default;
         this.hostDb = hostSchema_1.default;
         this.userDb = userSchema_1.default;
+        this.hotelDb = hotelSchema_1.default;
     }
     async findByEmail(email) {
         const isAdminExist = await this.adminDb.findOne({ email });
@@ -25,20 +29,34 @@ class adminRepository {
     }
     async findHotelRequest() {
         try {
-            const response = await this.hostDb.aggregate([
-                { $unwind: "$hotels" },
-                { $match: { "hotels.isHotelListed": "pending" } },
+            const response = await hostSchema_1.default.aggregate([
+                {
+                    $lookup: {
+                        from: "hotels", // The name of the Hotel collection
+                        localField: "hotels", // The array of hotel IDs in the Host collection
+                        foreignField: "_id", // The `_id` field in the Hotel collection
+                        as: "hotelDetails", // Alias for the joined data
+                    },
+                },
+                {
+                    $unwind: "$hotelDetails", // Unwind the hotelDetails array to work with individual hotel documents
+                },
+                {
+                    $match: {
+                        "hotelDetails.isHotelListed": "pending", // Match only hotels with isHotelListed = "pending"
+                    },
+                },
                 {
                     $project: {
                         _id: 0,
-                        hostId: "$_id",
-                        hotelName: "$hotels.hotelName",
-                        ownerFirstName: "$firstName",
-                        ownerLastName: "$lastName",
-                        ownerEmail: "$email",
-                        hotelPhoto: "$hotels.hotelPhoto",
-                        hotelAddress: "$hotels.address",
-                        hotelId: "$hotels._id",
+                        hostId: "$_id", // Map host ID
+                        hotelName: "$hotelDetails.hotelName", // Map hotel name from hotelDetails
+                        ownerFirstName: "$firstName", // Map host's first name
+                        ownerLastName: "$lastName", // Map host's last name
+                        ownerEmail: "$email", // Map host's email
+                        hotelPhoto: "$hotelDetails.hotelPhoto", // Map hotel photos
+                        hotelAddress: "$hotelDetails.address", // Map hotel address
+                        hotelId: "$hotelDetails._id", // Map hotel ID
                     },
                 },
             ]);
@@ -52,14 +70,22 @@ class adminRepository {
     }
     async approveHotel(hostId, hotelId) {
         try {
-            const response = await hostSchema_1.default.updateOne({ _id: hostId, 'hotels._id': hotelId }, { $set: { 'hotels.$.isHotelListed': 'approved' } });
+            // Verify the host owns the hotel before approving
+            const host = await hostSchema_1.default.findOne({ _id: hostId, hotels: hotelId }); // Ensure the host owns the hotel
+            if (!host) {
+                console.log('No matching host or hotel found.');
+                return { success: false, message: 'No matching host or hotel found.' };
+            }
+            // Update the `isHotelListed` field in the `Hotel` collection
+            const response = await hotelSchema_1.default.updateOne({ _id: hotelId }, { $set: { isHotelListed: 'approved' } });
             if (response.acknowledged && response.modifiedCount > 0) {
-                console.log('Hotel successfully approved and isHotelListed set to true.');
+                console.log('Hotel successfully approved.');
+                return { success: true, message: 'Hotel successfully approved.' };
             }
             else {
-                console.log('No matching host or hotel found.');
+                console.log('Failed to update the hotel status.');
+                return { success: false, message: 'Failed to update the hotel status.' };
             }
-            return response;
         }
         catch (error) {
             console.error('Error approving hotel:', error);
@@ -69,19 +95,25 @@ class adminRepository {
     async findApprovedHotel() {
         try {
             const response = await this.hostDb.aggregate([
-                { $unwind: "$hotels" },
-                { $match: { "hotels.isHotelListed": "approved" } },
+                { $lookup: {
+                        from: "hotels",
+                        localField: "hotels",
+                        foreignField: "_id",
+                        as: "hotelDetails"
+                    } },
+                { $unwind: "$hotelDetails" },
+                { $match: { "hotelDetails.isHotelListed": "approved" } },
                 {
                     $project: {
                         _id: 0,
                         hostId: "$_id",
-                        hotelName: "$hotels.hotelName",
+                        hotelName: "$hotelDetails.hotelName",
                         ownerFirstName: "$firstName",
                         ownerLastName: "$lastName",
                         ownerEmail: "$email",
-                        hotelPhoto: "$hotels.hotelPhoto",
-                        hotelAddress: "$hotels.address",
-                        hotelId: "$hotels._id",
+                        hotelPhoto: "$hotelDetails.hotelPhoto",
+                        hotelAddress: "$hotelDetails.address",
+                        hotelId: "$hotelDetails._id",
                     },
                 },
             ]);
@@ -95,7 +127,7 @@ class adminRepository {
     }
     async blockHotel(hostId, hotelId) {
         try {
-            const response = await hostSchema_1.default.updateOne({ _id: hostId, 'hotels._id': hotelId }, { $set: { 'hotels.$.isHotelListed': 'blocked' } });
+            const response = await hotelSchema_1.default.updateOne({ _id: hotelId }, { $set: { isHotelListed: 'blocked' } });
             if (response.acknowledged && response.modifiedCount > 0) {
                 console.log('Hotel successfully approved and isHotelListed set to true.');
             }
@@ -112,19 +144,25 @@ class adminRepository {
     async findRejectedHotel() {
         try {
             const response = await this.hostDb.aggregate([
-                { $unwind: "$hotels" },
-                { $match: { "hotels.isHotelListed": "blocked" } },
+                { $lookup: {
+                        from: "hotels",
+                        localField: "hotels",
+                        foreignField: "_id",
+                        as: "hotelDetails"
+                    } },
+                { $unwind: "$hotelDetails" },
+                { $match: { "hotelDetails.isHotelListed": "blocked" } },
                 {
                     $project: {
                         _id: 0,
                         hostId: "$_id",
-                        hotelName: "$hotels.hotelName",
+                        hotelName: "$hotelDetails.hotelName",
                         ownerFirstName: "$firstName",
                         ownerLastName: "$lastName",
                         ownerEmail: "$email",
-                        hotelPhoto: "$hotels.hotelPhoto",
-                        hotelAddress: "$hotels.address",
-                        hotelId: "$hotels._id",
+                        hotelPhoto: "$hotelDetails.hotelPhoto",
+                        hotelAddress: "$hotelDetails.address",
+                        hotelId: "$hotelDetails._id",
                     },
                 },
             ]);
@@ -170,19 +208,25 @@ class adminRepository {
     async findEditedHotelRequest() {
         try {
             const response = await this.hostDb.aggregate([
-                { $unwind: "$hotels" },
-                { $match: { "hotels.isHotelListed": "approved", "hotels.editedData": { $ne: null } } },
+                { $lookup: {
+                        from: "hotels",
+                        localField: "hotels",
+                        foreignField: "_id",
+                        as: "hotelDetails"
+                    } },
+                { $unwind: "$hotelDetails" },
+                { $match: { "hotelDetails.isHotelListed": "approved", "hotelDetails.editedData": { $ne: null } } },
                 {
                     $project: {
                         _id: 0,
                         hostId: "$_id",
-                        hotelName: "$hotels.hotelName",
+                        hotelName: "$hotelDetails.hotelName",
                         ownerFirstName: "$firstName",
                         ownerLastName: "$lastName",
                         ownerEmail: "$email",
-                        hotelPhoto: "$hotels.hotelPhoto",
-                        hotelAddress: "$hotels.address",
-                        hotelId: "$hotels._id",
+                        hotelPhoto: "$hotelDetails.hotelPhoto",
+                        hotelAddress: "$hotelDetails.address",
+                        hotelId: "$hotelDetails._id",
                     },
                 },
             ]);
@@ -196,7 +240,7 @@ class adminRepository {
     }
     async rejectEditHotelRequests(hostId, hotelId) {
         try {
-            const response = await hostSchema_1.default.updateOne({ _id: hostId, "hotels._id": hotelId }, { $set: { 'hotels.$.editedData': null } });
+            const response = await hotelSchema_1.default.updateOne({ _id: hotelId }, { $set: { editedData: null } });
             if (response.acknowledged && response.modifiedCount > 0) {
                 return "Hotel edited data rejected successfully";
             }
@@ -208,32 +252,46 @@ class adminRepository {
     }
     async approveEditHotelRequests(hostId, hotelId) {
         try {
-            console.log("inside admin repo approveEditHotelRequests", hostId, hotelId);
-            const host = await hostSchema_1.default.findOne({ _id: hostId, "hotels._id": hotelId }, { 'hotels.$': 1 });
-            if (!host || !host.hotels || host.hotels.length === 0) {
-                return "No hotels found with the given hostId and hotelId";
+            const hotel = await hotelSchema_1.default.findOne({ _id: hotelId });
+            if (!hotel) {
+                return "No hotel found with the given hotelId.";
             }
-            const hotel = host.hotels[0];
-            const editedData = hotel.editedData;
-            // console.log("edited",editedData)
+            // Verify that the hotel belongs to the host
+            const host = await hostSchema_1.default.findOne({ _id: hostId, hotels: hotelId });
+            if (!host) {
+                return "The specified hotel does not belong to the given host.";
+            }
+            const { editedData } = hotel;
             if (!editedData) {
-                return "No edited data found for this hotel";
+                return "No edited data found for this hotel.";
             }
-            // const updateFields:any={}
-            // for(const key in editedData){
-            //   updateFields[`hotels.$.${key}`]=editedData[key]
-            // }
-            // updateFields['hotels.$.editedData']=null
-            // console.log("Update fields:", JSON.stringify(updateFields, null, 2));
-            // console.log('updatedFields',updateFields)
-            console.log('EDO', editedData);
-            const response = await hostSchema_1.default.updateOne({ _id: hostId, "hotels._id": hotelId }, // Match host and the specific hotel
-            {
-                $set: {
-                    "hotels.$": { ...editedData } // Spread the new data into the matched array object
+            // console.log("Edited Data:", editedData)
+            const { roomCategories, ...hotelDataToUpdate } = editedData;
+            if ('editedData' in hotelDataToUpdate) {
+                delete hotelDataToUpdate.editedData;
+            } // Ensure editedData is explicitly cleared
+            console.log("hotelDataToUpdate", hotelDataToUpdate);
+            const roomCategoryIds = [];
+            console.log("roomCategories", roomCategories);
+            for (const roomCategory of roomCategories) {
+                if (roomCategory._id) {
+                    const updatedRoomCategory = await roomSchema_1.default.findByIdAndUpdate(roomCategory._id, roomCategory, { new: true });
+                    if (!updatedRoomCategory) {
+                        return `Room category with ID ${roomCategory._id} not found.`;
+                    }
+                    roomCategoryIds.push(updatedRoomCategory._id);
                 }
-            });
-            if (response.acknowledged && response.modifiedCount > 0) {
+            }
+            // Update the hotel with the edited data and clear the `editedData` field
+            const response = await hotelSchema_1.default.findByIdAndUpdate(hotelId, {
+                $set: {
+                    ...hotelDataToUpdate,
+                    roomCategories: roomCategoryIds, // Set updated room category IDs
+                    editedData: null, // Clear editedData
+                },
+            }, { new: true });
+            console.log("response in approving ", response);
+            if (response) {
                 return "Hotel edited data approved successfully";
             }
             return "No hotels found";

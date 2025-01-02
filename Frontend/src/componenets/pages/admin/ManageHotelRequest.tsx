@@ -2,7 +2,8 @@ import React, { useEffect } from 'react'
 import { AppDispatch, RootState } from '../../../utils/redux/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { approveHotelRequest, blockHotelRequest, getAllHotelRequest } from '../../../utils/axios/AdminApi/AdminApi'
-import { toast } from 'react-toastify';
+import Swal from "sweetalert2"
+import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom';
 
 const ManageHotelRequest = () => {
@@ -10,6 +11,7 @@ const ManageHotelRequest = () => {
   const { hotelDetails ,message} = useSelector((state: RootState) => state.admin);
   console.log("hotelDetails-->", hotelDetails);
   const navigate = useNavigate()
+
 
 
   useEffect(() => {
@@ -22,6 +24,26 @@ const ManageHotelRequest = () => {
 
     }
   }, [message,dispatch]);
+  const handleBlock=(hostId:string,hotelId:string,hotelName:string)=>{
+    Swal.fire({
+      title: `Block ${hotelName}?`,
+      text: `Are you sure you want to block this hotel?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33", // Unblock: Blue, Block: Red
+      cancelButtonColor: "#aaa",
+      confirmButtonText:  "Yes, Block",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(blockHotelRequest({hostId,hotelId}))
+          
+          if (message === "hotel blocked") {
+            toast.error(message);
+          }
+        
+      }
+    });
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -76,7 +98,8 @@ const ManageHotelRequest = () => {
                 <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                   onClick={
                   
-                    ()=> dispatch(blockHotelRequest({hostId: hotel.hostId, hotelId: hotel.hotelId}))
+                    ()=> handleBlock(hotel.hostId,hotel.hotelId,hotel.hotelName)
+
                    
                  }>
                   Reject

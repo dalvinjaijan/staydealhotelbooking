@@ -3,15 +3,40 @@ import { useNavigate } from 'react-router-dom'
 import { blockHotelRequest, getApprovedHotels } from '../../../utils/axios/AdminApi/AdminApi'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../utils/redux/store'
+import Swal from "sweetalert2"
+import { toast } from 'react-toastify'
+
 
 const AdminHotels = () => {
   const navigate=useNavigate()
+  const {message,hotelDetails}=useSelector((state:RootState)=>state.admin)
+
   const dispatch: AppDispatch = useDispatch<AppDispatch>();
 
   useEffect(()=>{
     dispatch(getApprovedHotels())
-  },[])
-const {hotelDetails}=useSelector((state:RootState)=>state.admin)
+  },[message])
+
+  const handleBlock=(hostId:string,hotelId:string,hotelName:string)=>{
+    Swal.fire({
+      title: `Block ${hotelName}?`,
+      text: `Are you sure you want to block this hotel?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33", // Unblock: Blue, Block: Red
+      cancelButtonColor: "#aaa",
+      confirmButtonText:  "Yes, Block",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(blockHotelRequest({hostId,hotelId}))
+          
+          if (message === "hotel blocked") {
+            toast.error(message);
+          }
+        
+      }
+    });
+  }
   return (
     <div>
  <div  className="flex justify-between">
@@ -71,7 +96,7 @@ const {hotelDetails}=useSelector((state:RootState)=>state.admin)
                 <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                 onClick={
                   
-                    ()=> dispatch(blockHotelRequest({hostId: hotel.hostId, hotelId: hotel.hotelId}))
+                 ()=> handleBlock(hotel.hostId,hotel.hotelId,hotel.hotelName)
                    
                  }>
                   Block

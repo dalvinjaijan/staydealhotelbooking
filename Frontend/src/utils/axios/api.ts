@@ -1,6 +1,6 @@
 import { createAsyncThunk, } from "@reduxjs/toolkit";
 import {api} from "./axiosconfig";
-import { userDetails } from "../interfaces";
+import { dataForBookingHotel, userDetails } from "../interfaces";
 
 const sendOtp=createAsyncThunk(
     'login/sendOtp',
@@ -105,7 +105,7 @@ const searchHotel=createAsyncThunk(
   'user/searchHotel',
   async({lngLat,searchInput}:{lngLat:any,searchInput:any},{rejectWithValue})=>{
     try {
-    console.log("lngLat",lngLat)
+    console.log("searchHotel",lngLat)
 
       const response=await api.post('/fetchHotels',{lngLat,searchInput})
       console.log("hotelDetails",response.data)
@@ -132,6 +132,51 @@ const fetchFilteredHotels=createAsyncThunk(
   }
 )
 
+const searchHotelforBooking=createAsyncThunk(
+  'user/searchHotelforBooking',
+  async({lngLat,numberOfRooms,totalGuests,checkIn,checkOut,searchTerm}:{lngLat:any,numberOfRooms:number,totalGuests:number,checkIn:Date,checkOut:Date,searchTerm:string},{rejectWithValue})=>{
+    try {
+    console.log("searchTerm",searchTerm)
+
+      const response=await api.post('/searchHotel',{lngLat,numberOfRooms,totalGuests,checkIn,checkOut,searchTerm})
+      console.log("hotelDetails",response.data)
+      // console.log("message",response.data.message)
+      return response.data
+    } catch (err:any) {
+      return rejectWithValue(err.response?.data?.error?.message)
+    }
+  }
+)
+
+const changeBookingDetail=createAsyncThunk(
+  'user/changeBookingDetail',
+  async({lngLat,numberOfRooms,guestNumber,checkIn,checkOut,hotelId,roomId}:{lngLat:any,numberOfRooms:number,guestNumber:number,checkIn:Date,checkOut:Date,hotelId:string,roomId:string},{rejectWithValue})=>{
+    try {
+      const data={lngLat,numberOfRooms,guestNumber,checkIn,checkOut,hotelId,roomId}
+      console.log("data",data,typeof data.numberOfRooms)
+      const response=await api.post('/changeBookingDetails',data)
+      return response.data
+    } catch (err:any) {
+      return rejectWithValue(err.response?.data?.error?.message)
+      
+    }
+  }
+)
+
+const bookRoom=createAsyncThunk(
+  'user/bookRoom',
+  async(bookingDetails:dataForBookingHotel,{rejectWithValue})=>{
+    try {
+      const response=await api.post('/bookRoom',bookingDetails)
+      console.log("response",response.data)
+      return response.data
+    } catch (err:any) {
+      return rejectWithValue(err.response?.data?.error?.message)
+      
+    }
+  }
+)
+
 
 
 export{
@@ -142,5 +187,8 @@ export{
     saveUserDetails,
     selectCity,
     searchHotel,
-    fetchFilteredHotels
+    fetchFilteredHotels,
+    searchHotelforBooking,
+    changeBookingDetail,
+    bookRoom
 }

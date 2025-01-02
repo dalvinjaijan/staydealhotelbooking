@@ -21,6 +21,8 @@ const AddHotelPolicy = () => {
       
       // State to handle input visibility and new amenity
       const [isAdding, setIsAdding] = useState(false);
+      const [selectedRules,setSelectedRules]=useState<string[]>([])
+      
       const [newRules, setNewRules] = useState('');
     const [cancellationPolicy, setCancellationPolicy] = useState<string | null>(null);
     const [checkInPeriod, setCheckInPeriod] = useState<'AM' | 'PM'>('AM');
@@ -32,6 +34,13 @@ const AddHotelPolicy = () => {
           setIsAdding(false);
         }
       };
+      const handleRuleChange=(rule:string)=>{
+        setSelectedRules((prevSelected) =>
+          prevSelected.includes(rule)
+            ? prevSelected.filter((item) => item !== rule) // Remove if already selected
+            : [...prevSelected, rule] // Add if not selected
+        );
+      }
 
   const inputStyle ='px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:border-light-green sm:text-sm inline-block w-[14rem]';
       useEffect(()=>{
@@ -108,7 +117,7 @@ const AddHotelPolicy = () => {
     }));
   
     // Add hotel rules and cancellation policy
-    formData.append('hotelRules', JSON.stringify(hotelRules) || '');
+    formData.append('hotelRules', JSON.stringify(selectedRules) || '');
     formData.append('cancellationPolicy', cancellationPolicy || '');
 
     // if(newRoomCategories?.roomPhotos){
@@ -205,12 +214,17 @@ const AddHotelPolicy = () => {
 <div className="mb-6">
       <h3 className="text-lg font-medium mb-2">Hotel Rules</h3>
       <div className="flex flex-wrap gap-4">
-        {/* Display the amenities as checkboxes */}
-        {hotelRules.map((rules, index) => (
+        {/* Display the rules as checkboxes */}
+
+        {hotelRules.map((rule, index) => (
           <label key={index}>
-            <input type="checkbox"  /> {rules}
+            <input type="checkbox" 
+                        onChange={() => handleRuleChange(rule)}
+                        checked={selectedRules.includes(rule)} // Check if it's selected
+             /> {rule}
           </label>
         ))}
+      
 
         {/* If isAdding is true, show input for adding new amenity */}
         {isAdding && (

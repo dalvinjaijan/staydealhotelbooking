@@ -34,11 +34,12 @@ const Header = () => {
   //   dispatch(loadTokensFromCookies());
   // }, [dispatch])
 
-  // useEffect(()=>{
-  //   console.log("state.message-->"+message)
-  //   console.log("state.error-->"+error)
+  useEffect(()=>{
+   if(!selectedLoc){
+    setShowLocationPopup(true)
+   }
 
-  // })
+  },[selectedLoc])
   const [isDropdownOpen,setDropdown]=useState(false)
   const toggleDropdown=()=>{
     setDropdown(!isDropdownOpen)
@@ -55,26 +56,47 @@ const Header = () => {
   console.log("latitude",latLng)
 
   const handleLocationSelect = (address: string, latLng: { lat: number, lng: number }) => {
+    console.log("handleCitySelect clicked",selectedCity)
     setSelectedLocation(address);
+    if(address){
+      let city=address.split(',')[0].trim()
+      dispatch(setLocation(city))
+    }
+ console.log("selectedLocation",address)   
+
+    
     setLatLng(latLng);
+    console.log("object",latLng)
     setShowLocationPopup(false)
+    dispatch(selectCity(latLng))
+
+    
+    navigate('/')
+
+
 
 
   };
   const cities = [
-    { name: 'Kochi', icon: '/src/assets/kochi.png' },
-    { name: 'Mumbai', icon: '/src/assets/mumbai.png' },
-    { name: 'Bengaluru', icon: '/src/assets/banglore.png' },
-    { name: 'Delhi', icon: '/src/assets/delhi.png' },
-    { name: 'Chennai', icon: '/src/assets/chennai.png' },
-    { name: 'Kolkata', icon: '/src/assets/kolkata.png' },
+    { name: 'Kochi', icon: '/src/assets/kochi.png' ,coordinates:{lat:9.9312328,lng:76.26730409999999}},
+    { name: 'Mumbai', icon: '/src/assets/mumbai.png',coordinates: {lat: 19.0759837, lng: 72.8776559}},
+    { name: 'Bengaluru', icon: '/src/assets/banglore.png',coordinates:{lat:12.9715987,lng:77.5945627}},
+    { name: 'Delhi', icon: '/src/assets/delhi.png',coordinates:{lat:28.7040592,lng:77.10249019999999} },
+    { name: 'Chennai', icon: '/src/assets/chennai.png',coordinates:{lat:13.0843007, lng: 80.2704622} },
+    { name: 'Kolkata', icon: '/src/assets/kolkata.png',coordinates:{lat: 22.5743545, lng: 88.3628734}},
     
   ];
 
-  const handleCitySelect = (city: string) => {
+  const handleCitySelect = (city: string,coordinates:{lat:number,lng:number}) => {
     setSelectedCity(city);
     setLatLng(latLng);
     setShowLocationPopup(false); // Close the popup after selecting a city
+    if(coordinates){
+      dispatch(selectCity(coordinates))
+      dispatch(setLocation(city))
+      navigate('/')
+      
+    }
   
   };
   useEffect(()=>{
@@ -103,13 +125,17 @@ const Header = () => {
           <div className='size-20 flex items-center ml-6 h-full'>
             <img src="/src/assets/Frame.svg" alt="Logo" />
           </div>
-          <div className='hidden sm:flex justify-between w-full px-56'>
-            <ul>Home</ul>
-            <ul
+          <div className='hidden sm:flex justify-between w-full px-56 '>
+            <ul className='cursor-pointer'
+            onClick={()=>navigate('/')}>Home</ul>
+            <ul className='cursor-pointer'
             onClick={()=>navigate('/host/home')}
             >List your properties</ul>
             <ul>Contact us</ul>
-            <ul>My booking</ul>
+            <ul className='cursor-pointer' 
+            onClick={()=>navigate('/myBooking')}
+            >
+              My booking</ul>
            
           </div>
           <button className='border rounded-2xl w-40'
@@ -163,9 +189,9 @@ const Header = () => {
                 <div
                   key={city.name}
                   className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${
-                    selectedCity === city.name ? 'text-yellow-500' : ''
+                    selectedLoc === city.name ? 'text-yellow-500' : ''
                   }`}
-                  onClick={() => handleCitySelect(city.name)}
+                  onClick={() => handleCitySelect(city.name,city.coordinates)}
                 >
                   <img
                     src={city.icon}

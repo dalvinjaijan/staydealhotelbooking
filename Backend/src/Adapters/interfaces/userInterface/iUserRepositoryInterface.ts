@@ -1,4 +1,5 @@
 import { Types } from "mongoose"
+import { bookingHotelDetails } from "./iUserInteractor"
 
 export interface userRepositoryInterface{
     fetchNearByHotels(lat: number, lng: number): Promise<any>
@@ -9,6 +10,12 @@ export interface userRepositoryInterface{
     getUserDetails(email:string):Promise<any>
     searchHotels(data:searchHotelsData):Promise<any>
     fetchFilteredHotels(data:filterHotelsData):Promise<any>
+    getHotelDetails(data:dataForBookingHotel):Promise<any>
+    fetchHotelDetails(data:dataForBookingHotel):Promise<any>
+    reserveRoom(bookingDetails:bookingHotelDetails):Promise<any>
+    getUpcomingOrders(userId:string):Promise<any>
+    getCompletedOrders(userId:string):Promise<any>
+
 }
 
  export interface searchHotelsData{
@@ -26,4 +33,19 @@ export interface filterHotelsData{
         lat:number,
         lng:number
     }
+}
+
+export interface dataForBookingHotel{
+    lngLat:{
+        lat:number,
+        lng:number
+    },
+    numberOfRooms:number,
+    totalGuests:number,
+    checkIn:Date,
+    checkOut:Date,
+    searchTerm:string,
+    hotelId:string,
+    roomId:string,
+    guestNumber:number
 }

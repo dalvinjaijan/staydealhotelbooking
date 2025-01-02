@@ -142,7 +142,7 @@ const adminSlice=createSlice({
             state.message=action.payload    
         })
         .addCase(approveEditHotelRequest.fulfilled,(state,action)=>{
-            console.log("payload",action)
+            console.log("payload",action.payload)
             state.message=action.payload    
         })
     }

@@ -97,5 +97,47 @@ class userInteractor {
             throw error;
         }
     }
+    async fetchHotel(data) {
+        try {
+            const response = await this.repository.getHotelDetails(data);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async fetchHotelDetails(data) {
+        try {
+            const response = await this.repository.fetchHotelDetails(data);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async bookRoom(bookingDetails) {
+        try {
+            const response = await this.repository.reserveRoom(bookingDetails);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async myOrders(type, userId) {
+        try {
+            if (type === "upcoming") {
+                const response = await this.repository.getUpcomingOrders(userId);
+                return response;
+            }
+            else {
+                const response = await this.repository.getCompletedOrders(userId);
+                return response;
+            }
+        }
+        catch (error) {
+            throw error;
+        }
+    }
 }
 exports.userInteractor = userInteractor;

@@ -3,7 +3,7 @@ import { AppDispatch, RootState } from '../../../utils/redux/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { blockUser, fetchUsers, unBlockUser } from '../../../utils/axios/AdminApi/AdminApi'
 import { toast } from 'react-toastify'
-import { MessagePort } from 'worker_threads'
+import Swal from "sweetalert2"
 
 const UserManagement = () => {
 
@@ -11,20 +11,30 @@ const UserManagement = () => {
     const {users,message}=useSelector((state:RootState)=>state.admin)
     const handleClick=(userId:string,index:number)=>{
         const user = users? users[index] :[];
-        if(user.isBlocked===false){
-            dispatch(blockUser({userId}))
-            if(message==="user blocked"){
-                toast.error(message)
-                return
+        Swal.fire({
+          title: user.isBlocked ? "Unblock User?" : "Block User?",
+          text: `Are you sure you want to ${user.isBlocked ? "unblock" : "block"} this user?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: user.isBlocked ? "#3085d6" : "#d33", // Unblock: Blue, Block: Red
+          cancelButtonColor: "#aaa",
+          confirmButtonText: user.isBlocked ? "Yes, Unblock" : "Yes, Block",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Dispatch block/unblock actions based on current user state
+            if (!user.isBlocked) {
+              dispatch(blockUser({ userId }));
+              if (message === "user blocked") {
+                toast.error(message);
+              }
+            } else {
+              dispatch(unBlockUser({ userId }));
+              if (message === "user unBlocked") {
+                toast.success(message);
+              }
             }
-        }else if(user.isBlocked===true){
-            console.log("yo")
-            dispatch(unBlockUser({userId}))
-            if(message==="user unBlocked"){
-                toast.success(message)
-                return
-            }
-        }
+          }
+        });
     }
     
   

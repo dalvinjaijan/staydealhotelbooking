@@ -1,5 +1,6 @@
 import {  createSlice, PayloadAction } from "@reduxjs/toolkit"; 
-import { sendOtp,verifyOtp,logout, userProfile,saveUserDetails, selectCity, searchHotel, fetchFilteredHotels } from "../../axios/api";
+import { sendOtp,verifyOtp,logout, userProfile,saveUserDetails, selectCity, searchHotel, fetchFilteredHotels, searchHotelforBooking, changeBookingDetail, bookRoom } from "../../axios/api";
+import { dataForBookingHotel, hotelSearchResult, reservationDetailsType } from "../../interfaces";
 
 
 
@@ -26,7 +27,10 @@ export interface Authstate{
     nearByHotels:any[]|null,
     selectedLoc:string |null,
     lngLat:object|null,
-    hotelSearchResult:object[]
+    hotelSearchResult:hotelSearchResult[],
+    hotelDetails:hotelSearchResult[],
+    bookingDetails:dataForBookingHotel|null,
+    reservationDetails:reservationDetailsType|null
 }
 
 const initialState:Authstate={
@@ -46,7 +50,10 @@ const initialState:Authstate={
     nearByHotels:null,
     selectedLoc:null,
     lngLat:null,
-    hotelSearchResult:[]
+    hotelDetails:[],
+    hotelSearchResult:[],
+    bookingDetails:null,    
+    reservationDetails:null
 
 }
 const userSlice=createSlice({
@@ -76,6 +83,20 @@ const userSlice=createSlice({
                     });
                   }
                 },
+
+                saveBookingDetails:(state,action)=>{
+                    const {roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId}=action.payload
+                    state.bookingDetails={...state.bookingDetails,roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId}
+                },
+                saveGuestDetails:(state,action)=>{
+                    const {name,email,phone,country}=action.payload
+                    state.bookingDetails={...state.bookingDetails,name,email,phone,country}
+                },
+                saveSessionId:(state,action)=>{
+                    if(state.bookingDetails)
+                   state.bookingDetails.paymentId=action.payload
+                }
+
         
         },
     extraReducers:(builder)=>{
@@ -172,12 +193,14 @@ const userSlice=createSlice({
         .addCase(selectCity.fulfilled,(state,action)=>{
             state.lngLat=(action.payload?.latLng)
             state.nearByHotels=(action.payload.response)
-
+         
 
         })
         .addCase(searchHotel.fulfilled,(state,action)=>{
-            state.hotelSearchResult=[...(action.payload) as object[]]
+            state.hotelSearchResult=[...(action.payload) as hotelSearchResult[]]
+          
             state.loading=false
+            console.log("hotelSearchResult.fulfilled",state.loading)
             console.log("searchResult",action.payload)
         })
         .addCase(searchHotel.pending,(state,action)=>{
@@ -195,11 +218,36 @@ const userSlice=createSlice({
 
 
         })
+        .addCase(searchHotelforBooking.fulfilled,(state,action)=>{
+            console.log("message",action.payload?.response)
+           state.message=(action.payload?.message ? action.payload?.message :null)
+            state.hotelSearchResult=(action.payload?.response)
+            state.hotelDetails=(action?.payload?.response)
+            state.bookingDetails=action?.payload?.bookingData
+
+
+        })
+        .addCase(changeBookingDetail.fulfilled,(state,action)=>{
+            console.log("changeBookingDetail",action.payload?.response)
+           state.message=(action.payload?.message ? action.payload?.message :null)
+           
+            state.hotelDetails=(action?.payload?.response)
+            state.bookingDetails=action?.payload?.bookingData
+        })
+        .addCase(bookRoom.fulfilled,(state,action)=>{
+            console.log("bookRoom",action.payload?.booking)
+           state.message=(action.payload?.message ? action.payload?.message :null)
+           state.reservationDetails=action.payload.booking
+           if(state.reservationDetails)
+           state.reservationDetails.roomNumbers=action.payload.reservedRoomNumbers
+           
+        })
+
 
 
     }
 } 
 )
 
-export const {  resetStates,setLocation,sortHotelsByPrice , resetHotelSearchs } = userSlice.actions;
+export const {  resetStates,setLocation,sortHotelsByPrice ,saveSessionId, resetHotelSearchs,saveBookingDetails,saveGuestDetails } = userSlice.actions;
 export default userSlice.reducer    

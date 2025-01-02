@@ -6,6 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userController = void 0;
 const errorHandling_1 = require("../../middlewares/errorHandling");
 const cloudinary_1 = __importDefault(require("../../../Utils/cloudinary"));
+const stripe_1 = __importDefault(require("stripe"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+// Initialize Stripe with your secret key
+const stripe = new stripe_1.default(process.env.STRIPE_SCERET_KEY);
 class userController {
     interactor;
     constructor(interactor) {
@@ -20,11 +25,13 @@ class userController {
             }
             else if (type === 'email') {
                 const user = await this.interactor.getUserByEmail(email);
-                // console.log("userrrr",user)
-                if (user.isBlocked) {
-                    const error = new errorHandling_1.customError("user is blocked", 401);
-                    console.log("error to throw", error);
-                    throw error;
+                console.log("userrrr", user);
+                if (user) {
+                    if (user.isBlocked) {
+                        const error = new errorHandling_1.customError("user is blocked", 401);
+                        console.log("error to throw", error);
+                        throw error;
+                    }
                 }
                 const otp = await this.interactor.sendOtp(email);
                 if (otp) {
@@ -160,6 +167,82 @@ class userController {
             else {
                 res.json({ message: "No hotels found" });
             }
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async searchHotel(req, res, next) {
+        try {
+            const bookingData = req.body;
+            console.log("object", bookingData);
+            const response = await this.interactor.fetchHotel(bookingData);
+            res.json({ message: "Hotels data found successfully", response, bookingData });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async changeBookingDetails(req, res, next) {
+        try {
+            let bookingData = req.body;
+            console.log("object", bookingData);
+            const response = await this.interactor.fetchHotelDetails(bookingData);
+            bookingData = { ...bookingData, totalGuests: bookingData.guestNumber };
+            res.json({ message: "Hotels data found successfully", response, bookingData });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async createPayment(req, res, next) {
+        try {
+            const { amount, currency, description } = req.body;
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ["card"],
+                line_items: [
+                    {
+                        price_data: {
+                            currency,
+                            product_data: {
+                                name: description,
+                            },
+                            unit_amount: amount * 100, // Convert to cents
+                        },
+                        quantity: 1,
+                    },
+                ],
+                mode: "payment",
+                success_url: `http://localhost:5173/payment-success?amount=${amount}&description=${encodeURIComponent(description)}`,
+                cancel_url: "http://localhost:5173/payment-cancel",
+            });
+            res.send({ id: session.id });
+        }
+        catch (error) {
+            console.error("Error creating checkout session:", error.message);
+            res.status(500).send({ error: "Failed to create checkout session" });
+        }
+    }
+    async bookRoom(req, res, next) {
+        try {
+            const bookingDetails = req.body;
+            console.log("bookingDetails", bookingDetails);
+            const response = await this.interactor.bookRoom(bookingDetails);
+            res.json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async myBooking(req, res, next) {
+        try {
+            const { type, userId } = req.query;
+            if (typeof type !== "string" || typeof userId !== "string") {
+                return res.status(400).json({ error: "Invalid type or userId" });
+            }
+            // console.log("bookingDetails",bookingDetails)
+            const response = await this.interactor.myOrders(type, userId);
+            res.json(response);
         }
         catch (error) {
             next(error);
