@@ -72,11 +72,11 @@ const getApprovedHotels=createAsyncThunk(
 )
 const blockHotelRequest=createAsyncThunk(
   'admin/blockHotelRequest',
-  async ({hostId,hotelId}:{hostId:string,hotelId:string},{rejectWithValue})=>{
+  async ({hotelId}:{hotelId:string},{rejectWithValue})=>{
       try{
         console.log("inside thunk of getHotel");
         
-      const response=await adminApi.patch('/blockHotel',{hostId,hotelId})
+      const response=await adminApi.patch('/blockHotel',{hotelId})
       console.log(response.data)
       return response.data
     } catch (err:any) {

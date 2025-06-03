@@ -8,6 +8,9 @@ import { toast } from 'react-toastify';
 import PlacesAutoComplete from '../host/PlacesAutoComplete';
 import { PlacesContext } from '../../../context/placesContext';
 import { setLocation } from '../../../utils/redux/slices/userSlice';
+import { IoIosNotifications } from "react-icons/io";
+import { useSocket } from '../../../context/socketio';
+import { api } from '../../../utils/axios/axiosconfig';
 
 
 const Header = () => {
@@ -15,10 +18,13 @@ const Header = () => {
   
   // useSelector must be inside the component
   const dispatch:AppDispatch = useDispatch<AppDispatch>();
+    const [notificationCount, setNotificationCount] = useState<number>(0);
+
   const {message,error,userInfo,selectedLoc}=useSelector((state:RootState)=>state.user)
   const [showLocationPopup, setShowLocationPopup] = useState<boolean>(false);
   const [selectedCity, setSelectedCity] = useState<string>('');
   const isLoaded = useContext(PlacesContext)
+  const { socket } = useSocket();
 
   console.log("error",error);
   
@@ -33,6 +39,36 @@ const Header = () => {
   // useEffect(() => {
   //   dispatch(loadTokensFromCookies());
   // }, [dispatch])
+  // useEffect(() => {
+  //   if (userInfo?.userId) {
+
+  //     const fetchNotification = async () => {
+  //       try {
+  //           const id=userInfo?.userId
+  //         const response = await api.get(`/notificationUpdater/${id}`);
+  //         console.log("response",response.data)
+  //         if (response) {
+  //           setNotificationCount(response.data.count)
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching chat:", error);
+  //       } 
+  //     };
+    
+  //     fetchNotification();
+  
+       
+  //   }
+
+//     socket?.on("notifictaionUpdated", (response: { count: number }) => {
+//         setNotificationCount(response.count);
+//     });
+
+//     return () => {
+//         socket?.off("notifictaionUpdated");
+//     };
+// }, [socket]);
+
 
   useEffect(()=>{
    if(!selectedLoc){
@@ -66,7 +102,7 @@ const Header = () => {
 
     
     setLatLng(latLng);
-    console.log("object",latLng)
+    console.log("objectt",latLng)
     setShowLocationPopup(false)
     dispatch(selectCity(latLng))
 
@@ -94,7 +130,7 @@ const Header = () => {
     if(coordinates){
       dispatch(selectCity(coordinates))
       dispatch(setLocation(city))
-      navigate('/')
+      navigate('/hotelsIn')
       
     }
   
@@ -131,11 +167,26 @@ const Header = () => {
             <ul className='cursor-pointer'
             onClick={()=>navigate('/host/home')}
             >List your properties</ul>
-            <ul>Contact us</ul>
+            {/* <ul>Contact us</ul> */}
             <ul className='cursor-pointer' 
             onClick={()=>navigate('/myBooking')}
             >
               My booking</ul>
+              {/* <div>
+              <div className="relative">
+                                    <IoIosNotifications className="text-orange text-2xl" />
+
+                                    <div className="absolute -top-3 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center bg-green-500">
+                                        {notificationCount}
+                                    </div>
+                                </div>
+
+              <ul className='cursor-pointer' 
+            onClick={()=>navigate('/notification')}
+            >
+              Notification</ul>
+              </div> */}
+              
            
           </div>
           <button className='border rounded-2xl w-40'

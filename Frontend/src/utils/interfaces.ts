@@ -90,6 +90,7 @@ type HotelDetail = {
 export type HostState = {
     hostInfo: {
         accessToken: string | null;
+        role:string
         hostId: string | null;
         email: string | null;
         firstName: string | null;
@@ -117,6 +118,7 @@ export interface AdminAuthstate{
    
     adminInfo: {
         accessToken: string | null;
+        role:string,
         adminId: any|null,
         email:string|null,
         name:string|null,
@@ -135,6 +137,7 @@ export interface dataForBookingHotel{
         lat:number,
         lng:number
     },
+    noOfDays:number
     numberOfRooms:number,
     totalGuests:number,
     checkIn:Date,
@@ -175,6 +178,7 @@ export interface hotelSearchResult {
       _id: string;
     };
     totalNoOfRooms: number;
+    ratings:any[]|null
   }
   
   export interface RoomCategory {
@@ -211,4 +215,75 @@ export  interface GuestDetails {
     paymentId: string | null;
     GuestDetails: GuestDetails;
     
+  }
+
+  interface IMessage {
+    _id: string;
+    chatId: string;
+    message: string;
+    sender: "user" | "host"; 
+    hostdelete: boolean;
+    userdelete: boolean;
+    createdAt: string; // ISO string format for date
+    updatedAt: string; // ISO string format for date
+    seen:boolean;
+    __v: number; // Version key added by MongoDB
+  }
+  
+
+export interface IChatingUser {
+    _id: string;
+    host: {
+      _id: string; 
+      firstName: string; 
+      profileImage?:string
+    }
+    user: {
+      _id: string; 
+      firstName: string; 
+      profileImage: string; 
+    };
+    newMessage?:{message:string,updatedAt:string}
+    messages?:IMessage[]
+  }
+
+  export interface NotificationGetter {
+    count: number;
+    createdAt: string; // ISO date string
+    latestMessage: string; // ObjectId represented as a string
+    message: {
+      _id: string; // ObjectId represented as a string
+      sender: string;
+      chatId: string; // ObjectId represented as a string
+      message: string;
+      hostdelete: boolean;
+      userdelete: boolean;
+      seen: boolean;
+      createdAt: string; // ISO date string
+      updatedAt: string; // ISO date string
+      __v: number;
+    };
+    hostId: string; // ObjectId represented as a string
+    updatedAt: string; // ISO date string
+    host: {
+      firstName: string;
+      profileImage: string;
+    };
+    userId: string; // ObjectId represented as a string
+    _id: string; // ObjectId represented as a string
+  }
+
+
+  export interface ratings{
+    _id: string;
+    rating: number;
+    review:string;
+    bookingId:string;
+    user:{
+      _id:string,
+      email:string;
+      firstName:string;
+      lastName:string;
+      profileImage:string
+    }
   }

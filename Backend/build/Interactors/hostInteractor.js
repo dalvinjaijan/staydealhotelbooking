@@ -103,5 +103,92 @@ class hostInteractor {
         catch (error) {
         }
     }
+    async viewProfile(hostId) {
+        try {
+            const response = await this.repository.fetchProfileDetails(hostId);
+            return response;
+        }
+        catch (error) {
+        }
+    }
+    async viewTransactions(hostId) {
+        try {
+            const response = await this.repository.fetchWalletTransactions(hostId);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async fetchReportLogic(period, hostId) {
+        try {
+            if (period === "yearly") {
+                const yearlyData = await this.repository.fetchYearlyBookings(hostId);
+                return yearlyData;
+            }
+            else if (period === "monthly") {
+                const monthlyData = await this.repository.fetchMonthlyBookings(hostId);
+                return monthlyData;
+            }
+            else if (period === "daily") {
+                const dailyData = await this.repository.fetchDailyBookings(hostId);
+                return dailyData;
+            }
+        }
+        catch (error) {
+            throw new Error("Error fetching report");
+        }
+    }
+    async fetchPieData(hostId) {
+        try {
+            const dailyData = await this.repository.fetchPieReport(hostId);
+            return dailyData;
+        }
+        catch (error) {
+            throw new Error("Error fetching report");
+        }
+    }
+    async reservations(type, hostId) {
+        try {
+            if (type === "upcoming") {
+                const response = await this.repository.getUpcomingOrders(hostId);
+                return response;
+            }
+            else {
+                const response = await this.repository.getCompletedOrders(hostId);
+                return response;
+            }
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async notificationCountUpdater(id) {
+        try {
+            const response = await this.repository.notificationCountUpdater(id);
+            return response;
+        }
+        catch (error) {
+            throw new errorHandling_1.customError(error.message, error.statusCode);
+        }
+    }
+    async notificationsGetter(id) {
+        try {
+            const response = await this.repository.notificationsGetter(id);
+            console.log("his.providerRepo.notificationsGetter(id)", response);
+            if (response.countOfUnreadMessages.length > 0 &&
+                response.notfiyData.length > 0) {
+                const data = response.notfiyData.map((data) => {
+                    const matchedItem = response.countOfUnreadMessages.find((item) => item._id + "" === data._id + "");
+                    return { ...data, count: matchedItem ? matchedItem.count : 1 };
+                });
+                return { notfiyData: data };
+            }
+            return { notfiyData: [] };
+        }
+        catch (error) {
+            throw new errorHandling_1.customError(error.message, error.statusCode);
+        }
+    }
 }
 exports.hostInteractor = hostInteractor;

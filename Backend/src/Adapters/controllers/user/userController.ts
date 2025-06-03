@@ -6,6 +6,10 @@ import { log } from "console";
 import cloudinaryV2 from "../../../Utils/cloudinary";
 import Stripe from 'stripe';
 import dotenv from "dotenv"
+import HttpStatus from "../../interfaces/statusCodes";
+import { IChatInteractor } from "../../interfaces/chatInterface/IChatInteractor";
+import ChatInteractor from "../../../Interactors/chatInteractor";
+// import chatInteractor from "../../../Interactors/chatInteractor";
 
 
 dotenv.config();
@@ -17,9 +21,11 @@ const stripe = new Stripe(process.env.STRIPE_SCERET_KEY as string);
 
 export class userController {
   private interactor: userInteractorInterface;
+  private  chatInteractor: IChatInteractor
 
-  constructor(interactor: userInteractorInterface) {
+  constructor(interactor: userInteractorInterface,chatInteractor:IChatInteractor) {
     this.interactor = interactor;
+    this.chatInteractor=chatInteractor
   }
 
   async authenticateUser(req: CustomRequest, res: Response, next: NextFunction): Promise<void> {
@@ -157,11 +163,12 @@ async editProfile(req:CustomRequest,res:Response,next:NextFunction){
 
 async getHotels(req:Request,res:Response,next:NextFunction){
   try {
-    const data=req.body
+    let data=req.query
     console.log("data",data)
-    if(data?.searchInput){                      //if there data has searchInput search hotels wil work 
+    if(data?.searchInput && typeof data?.lngLat==="string"){                      //if there data has searchInput search hotels wil work 
       console.log("searchInput",data.lngLat)
-      const response = await this.interactor.getHotels(data);
+     let updatedData = { ...data, lngLat: JSON.parse(data.lngLat) }
+      const response = await this.interactor.getHotels(updatedData);
       if(response!=null){
     
         res.json(response)
@@ -170,17 +177,21 @@ async getHotels(req:Request,res:Response,next:NextFunction){
         res.json({message:"no hotels found"})
       }
     }else{
-      const {lat,lng}=data
-      console.log("lat and lng",lat,lng)   
-
-    const response=await this.interactor.getNearbyHotels(lat,lng)
-    if(response!=null){
-      const latLng={lat,lng}
-      res.json({response,latLng})
-
-    }else{
-      res.json({message:"no nearby hotels"})
-    }
+      if(data && typeof data.latLng==="string"){
+        const parsedLatLng=JSON.parse(data.latLng)
+        const {lat,lng}=parsedLatLng
+        console.log("lat and lng",parsedLatLng)   
+  
+      const response=await this.interactor.getNearbyHotels(lat,lng)
+      if(response!=null){
+        const latLng={lat,lng}
+        res.json({response,latLng})
+  
+      }else{
+        res.json({message:"no nearby hotels"})
+      }
+      }
+   
     }
     
   } catch (error) {
@@ -216,12 +227,25 @@ async filterHotels(req:Request,res:Response,next:NextFunction){
 
 async searchHotel(req:Request,res:Response,next:NextFunction){
   try {
-    const bookingData=req.body
+    const{checkIn,checkOut,noOfDays}=req.body
+    console.log("number of Days",noOfDays)
+    let bookingData=req.body
+    console.log("checkIn",checkIn,checkOut)
+    let offSetMinute=5*60+30
+    let checkOutDate=new Date(new Date(checkOut).getTime()+offSetMinute*60*1000)
+    console.log("checkIn",checkIn,checkOutDate)
+    bookingData={...bookingData,checkOut:checkOutDate}
+
+
     console.log("object",bookingData)
 
     const response=await this.interactor.fetchHotel(bookingData)
-    res.json({message:"Hotels data found successfully",response,bookingData})
+    if(response.checkIn && response.checkOut){
+      bookingData={...bookingData,checkIn:response.checkIn,checkOut:response.checkOut}
 
+      
+    res.json({message:"Hotels data found successfully",response:response.hotels,bookingData})
+    }
   } catch (error) {
     next(error)
   }
@@ -298,6 +322,165 @@ async myBooking(req:Request,res:Response,next:NextFunction){
     
   }
   }
+
+
+  async viewWalletTransactions(req:Request,res:Response,next:NextFunction){
+    try {
+      const {role,id}=req.query
+
+   
+      console.log("role",role,"userId",id)
+      if(typeof id==="string"){
+        const response=await this.interactor.viewTransactions(id)
+        res.json(response)
+      }
+      // res.json(response)
+    
+    } catch (error) {
+      next(error)
+      
+    }
+    }
+    async cancelBooking(req:Request,res:Response,next:NextFunction){
+      try {
+        const {bookingId,roomPolicies,checkInDate,checkOutDate}=req.body
+  
+     
+        console.log("bookingId",bookingId)
+        if(typeof bookingId==="string"){
+          const response=await this.interactor.cancelLogic(bookingId,roomPolicies,checkInDate,checkOutDate)
+          if(response)
+          res.status(200).json( response );
+
+         
+        }
+        
+      
+      } catch (error) {
+        next(error)
+        
+      }
+      }
+
+      async ratingAndReview(req:Request,res:Response,next:NextFunction){
+        try {
+          const data=req.body
+    
+       
+
+          if(data){
+            const response=await this.interactor.rateTheHotel(data)
+            if(response)
+            res.status(200).json( {message:"booking rated successfully",response} );
+  
+           
+          }
+          
+        
+        } catch (error) {
+          next(error)
+          
+        }
+        }
+
+    
+    
+        async reportHotel(req:Request,res:Response,next:NextFunction){
+          try {
+            const data=req.body
+      
+         
+  
+            if(data){
+              const response=await this.interactor.reporthotel(data)
+              if(response)
+              res.status(200).json( {message:"Hotel reported successfully",response} );
+    
+             
+            }
+            
+          
+          } catch (error) {
+            next(error)
+            
+          }
+          }
+
+          async getChatOfOneToOne(req: Request, res: Response, next: NextFunction) {
+            try {
+              const { chatId, whoWantsData } = req.params;
+              const response = await this.chatInteractor.getChatOfOneToOne(
+                chatId,
+                whoWantsData
+              );
+              console.log("getChatOfOneToOne",response)
+              return res.status(HttpStatus.OK).json(response);
+            } catch (error) {
+              next(error);
+            }
+          }
+        
+          async fetchChat(req: Request, res: Response, next: NextFunction) {
+            try {
+              const { whom, id } = req.params;
+              const response = await this.chatInteractor.fetchChats(whom, id);
+              return res.status(HttpStatus.OK).json(response);
+            } catch (error) {
+              next(error);
+            }
+          }
+        
+          async addMessage(req: Request, res: Response, next: NextFunction) {
+            try {
+              const { sender, chatId, message } = req.body;
+              console.log(chatId);
+        
+              const response = await this.chatInteractor.addNewMessage(
+                sender,
+                chatId,
+                message
+              );
+              return res.status(HttpStatus.OK).json(response);
+            } catch (error) {
+              next(error);
+            }
+          }
+        
+          async getChatId(req: Request, res: Response, next: NextFunction) {
+            try {
+              const { hostId, userId } = req.params;
+              console.log("hostId, userId in controller", hostId, userId);
+        
+              const response = await this.chatInteractor.getChatid(hostId, userId);
+              return res.status(200).json(response);
+            } catch (error) {
+              next(error);
+            }
+          }
+        
+          // async notificationCountUpdater(
+          //   req: Request,
+          //   res: Response,
+          //   next: NextFunction
+          // ) {
+          //   try {
+          //     const { id } = req.params;
+          //     const response = await this.interactor.notificationCountUpdater(id);
+          //     return res.status(HttpStatus.OK).json(response);
+          //   } catch (error) {
+          //     next(error);
+          //   }
+          // }
+        
+          // async notificationGetter(req: Request, res: Response, next: NextFunction) {
+          //   try {
+          //     const { id } = req.params;
+          //     const response = await this.interactor.notificationsGetter(id);
+          //     return res.status(HttpStatus.OK).json(response);
+          //   } catch (error) {
+          //     next(error);
+          //   }
+          // }
 
 
 

@@ -40,9 +40,11 @@ const HostHeader = () => {
            {hostInfo?.accessToken?(
             <div className='flex justify-between w-[90%]'>
             <div className='hidden sm:flex gap-28 w-full justify-center'>
-            <ul className='tracking-wider'>Home</ul>
-            <ul className='tracking-wider'>Reservations</ul>
-            <ul className='tracking-wider'>Contact us</ul>
+            <ul className='tracking-wider' onClick={()=>navigate('/host/dashboard')} >Dashboard</ul>
+            <ul className='tracking-wider' onClick={()=>navigate('/host/home')}>properties</ul>
+            <ul className='tracking-wider' onClick={()=>navigate('/host/reservations')}>Reservations</ul>
+            {/* <ul className='tracking-wider'>Contact us</ul> */}
+            
            
           </div>
             <div className='relative'>
@@ -52,7 +54,7 @@ const HostHeader = () => {
               <div className="absolute right-4 mt-4 w-28 bg-white rounded-lg shadow-lg">
               <ul className="py-1">
               <li className="px-6 py-1 hover:bg-light-green cursor-pointer text-black hover:text-white"
-                                onClick={()=>navigate('/userProfile')}>Profile</li>
+                                onClick={()=>navigate('/host/viewProfile')}>Profile</li>
                  
                 <li className="px-6 py-1 hover:bg-light-green cursor-pointer text-black hover:text-white"
                 onClick={handleLogout}

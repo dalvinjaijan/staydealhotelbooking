@@ -11,7 +11,7 @@ export interface Authstate{
    
     userInfo: {
         accessToken: string | null;
-       
+       role:string,
         userId: any|null,
         email:string|null,
         firstName:string|null,
@@ -19,6 +19,7 @@ export interface Authstate{
         dob:string|null,
         phone:number|null
         profileImage:string|null
+        wallet:number
 
     } | null;
     loading: boolean;
@@ -36,13 +37,15 @@ export interface Authstate{
 const initialState:Authstate={
     userInfo:{
         accessToken: null,
+        role:"",
         userId:null,
         email:null,
         firstName:null,
         lastName:null,
         dob:null,
         phone:null,
-        profileImage:null
+        profileImage:null,
+        wallet:0
     },
     loading:false,
     error:null,
@@ -85,8 +88,8 @@ const userSlice=createSlice({
                 },
 
                 saveBookingDetails:(state,action)=>{
-                    const {roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId}=action.payload
-                    state.bookingDetails={...state.bookingDetails,roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId}
+                    const {roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId,noOfDays}=action.payload
+                    state.bookingDetails={...state.bookingDetails,roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId,noOfDays}
                 },
                 saveGuestDetails:(state,action)=>{
                     const {name,email,phone,country}=action.payload
@@ -125,6 +128,7 @@ const userSlice=createSlice({
 
             state.userInfo = {
               accessToken: accessToken || state.userInfo?.accessToken || null,
+              role:"user",
               
               userId:userId,
               email:null,
@@ -132,7 +136,8 @@ const userSlice=createSlice({
               lastName:null,
               dob:null,
               phone:null,
-              profileImage:null
+              profileImage:null,
+              wallet:0
             };
             // localStorage.setItem('userInfo', JSON.stringify(state.userInfo));
         })
@@ -162,6 +167,7 @@ const userSlice=createSlice({
                 state.userInfo.dob=action.payload?.userDetails?.dob||null
                 state.userInfo.phone=action.payload?.userDetails?.phone||null
                 state.userInfo.profileImage=action.payload?.userDetails?.profileImage||null
+                state.userInfo.wallet=action.payload?.userDetails?.wallet
                 
 
                 state.userInfo={
@@ -171,7 +177,8 @@ const userSlice=createSlice({
                     lastName:state.userInfo.lastName,
                     dob:state.userInfo.dob,
                     phone:state.userInfo.phone,
-                    profileImage:state.userInfo.profileImage
+                    profileImage:state.userInfo.profileImage,
+                    wallet:state.userInfo.wallet
 
                 }
                 // localStorage.setItem('userInfo',JSON.stringify(state.userInfo))
@@ -221,7 +228,7 @@ const userSlice=createSlice({
         .addCase(searchHotelforBooking.fulfilled,(state,action)=>{
             console.log("message",action.payload?.response)
            state.message=(action.payload?.message ? action.payload?.message :null)
-            state.hotelSearchResult=(action.payload?.response)
+            // state.hotelSearchResult=(action.payload?.response)
             state.hotelDetails=(action?.payload?.response)
             state.bookingDetails=action?.payload?.bookingData
 

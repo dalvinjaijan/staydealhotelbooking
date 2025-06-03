@@ -1,7 +1,6 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import UserLogin from '../componenets/pages/users/UserLogin'
-import Home from '../componenets/pages/users/Home'
 import VerifyOtp from '../componenets/pages/users/VerifyOtp'
 import UserProfile from '../componenets/pages/users/UserProfile'
 import PrivateRoutes from '../componenets/pages/users/PrivateRoutes'
@@ -14,12 +13,19 @@ import PaymentSuccess from '../componenets/pages/users/SuccessPage'
 import BookingSuccessPage from '../componenets/pages/users/BookingSuccessPage'
 import OrderDetailPage from '../componenets/pages/users/orderDetailPage'
 import MyBooking from '../componenets/pages/users/MyBooking'
+import WalletTransaction from '../componenets/pages/commonComponents/WalletTransactions'
+import { ChatComponenet } from '../componenets/pages/ChatComponent'
+import UserNotification from '../componenets/pages/users/notification'
+import HotelsIn from '../componenets/pages/users/HotelsIn'
+import Home from '../componenets/pages/users/Home'
 
 const UserRoutes = () => {
   return (
     <Routes>
         
+        <Route path='/hotelsIn' element={<HotelsIn />}/>
         <Route path='/' element={<Home />}/>
+
 
         <Route path='/login' element={<UserLogin/>}/>
         <Route path='/verifyOtp' element={<VerifyOtp />}/>
@@ -31,7 +37,7 @@ const UserRoutes = () => {
 
         
 
-        <Route element={<PrivateRoutes/>}>
+        <Route element={<PrivateRoutes role={"user"}/>}>
         <Route path='/userProfile' element={<UserProfile />} />
         <Route path='/addGuestDetails' element={<AddGuestDetails />} />
         <Route path='/paymentMethod' element={<PaymentMethod />} />
@@ -39,6 +45,11 @@ const UserRoutes = () => {
         <Route path='/confirmation' element={<BookingSuccessPage />} />
         <Route path='/orderDetailPage' element={<OrderDetailPage />} />
         <Route path='/myBooking' element={<MyBooking />} />
+        <Route path='/walletTransactions' element={<WalletTransaction role={'user'}/>} />
+        <Route path='/chat/:chatid/:hostid' element={<ChatComponenet />} />
+        <Route path='/notification' element={<UserNotification />} />
+
+
           
         </Route>
       

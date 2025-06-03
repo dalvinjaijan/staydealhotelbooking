@@ -50,7 +50,7 @@ const userProfile=createAsyncThunk(
       // console.log("inside thunk");
       // console.log("userId inside thunk-->"+userId)
       const userDetails=await api.post('/profile',{userId})
-      // console.log("Userprofile",userDetails.data);
+      console.log("Userprofile",userDetails.data);
       return userDetails.data
       
     } catch (err:any) {
@@ -89,7 +89,8 @@ const selectCity=createAsyncThunk(
   'user/selectCity',
   async(latLng:any,{rejectWithValue})=>{
     try {
-      const response=await api.post('/fetchHotels',latLng)
+      console.log("latLng",latLng)
+      const response=await api.get(`/fetchHotels?page=1&latLng=${encodeURIComponent(JSON.stringify(latLng))}`)
       console.log("hotelDetails",response.data?.response)
       console.log("latLng",response.data?.latLng)
       
@@ -107,7 +108,7 @@ const searchHotel=createAsyncThunk(
     try {
     console.log("searchHotel",lngLat)
 
-      const response=await api.post('/fetchHotels',{lngLat,searchInput})
+      const response=await api.get(`/fetchHotels?lngLat=${encodeURIComponent(JSON.stringify(lngLat))}&&searchInput=${searchInput}`)
       console.log("hotelDetails",response.data)
       // console.log("message",response.data.message)
       return response.data
@@ -134,11 +135,11 @@ const fetchFilteredHotels=createAsyncThunk(
 
 const searchHotelforBooking=createAsyncThunk(
   'user/searchHotelforBooking',
-  async({lngLat,numberOfRooms,totalGuests,checkIn,checkOut,searchTerm}:{lngLat:any,numberOfRooms:number,totalGuests:number,checkIn:Date,checkOut:Date,searchTerm:string},{rejectWithValue})=>{
+  async({lngLat,numberOfRooms,totalGuests,checkIn,checkOut,searchTerm,noOfDays}:{lngLat:any,numberOfRooms:number,totalGuests:number,checkIn:Date,checkOut:Date,searchTerm:string,noOfDays:number},{rejectWithValue})=>{
     try {
-    console.log("searchTerm",searchTerm)
+    console.log("inside searchHotelforBooking",checkIn,searchTerm,checkOut,noOfDays)
 
-      const response=await api.post('/searchHotel',{lngLat,numberOfRooms,totalGuests,checkIn,checkOut,searchTerm})
+      const response=await api.post('/searchHotel',{lngLat,numberOfRooms,totalGuests,checkIn,checkOut,searchTerm,noOfDays})
       console.log("hotelDetails",response.data)
       // console.log("message",response.data.message)
       return response.data
@@ -150,9 +151,9 @@ const searchHotelforBooking=createAsyncThunk(
 
 const changeBookingDetail=createAsyncThunk(
   'user/changeBookingDetail',
-  async({lngLat,numberOfRooms,guestNumber,checkIn,checkOut,hotelId,roomId}:{lngLat:any,numberOfRooms:number,guestNumber:number,checkIn:Date,checkOut:Date,hotelId:string,roomId:string},{rejectWithValue})=>{
+  async({lngLat,numberOfRooms,guestNumber,checkIn,checkOut,hotelId,roomId,noOfDays}:{lngLat:any,numberOfRooms:number,guestNumber:number,checkIn:Date,checkOut:Date,hotelId:string,roomId:string,noOfDays:number},{rejectWithValue})=>{
     try {
-      const data={lngLat,numberOfRooms,guestNumber,checkIn,checkOut,hotelId,roomId}
+      const data={lngLat,numberOfRooms,guestNumber,checkIn,checkOut,hotelId,roomId,noOfDays}
       console.log("data",data,typeof data.numberOfRooms)
       const response=await api.post('/changeBookingDetails',data)
       return response.data

@@ -7,6 +7,7 @@ import {  createSlice } from "@reduxjs/toolkit";
 const initialState:HostState={
     hostInfo:{
         accessToken: null,
+        role:"",
         hostId:null,
         email:null,
         firstName:null,
@@ -79,6 +80,7 @@ const hostSlice=createSlice({
 
             state.hostInfo = {
               accessToken: accessToken || state.hostInfo?.accessToken || null,
+              role:"host",
               
               hostId:hostDetails._id,
               email:hostDetails.email,

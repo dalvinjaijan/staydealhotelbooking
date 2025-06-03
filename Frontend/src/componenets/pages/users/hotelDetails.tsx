@@ -3,6 +3,7 @@ import { useState } from 'react'; // Optional: For managing coupon code input
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../utils/redux/store';
 import Header from './Header';
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 const HotelDetails = () => {
   const location = useLocation();
@@ -99,11 +100,52 @@ const HotelDetails = () => {
 </div>
 
       </div>
-      <p className="mt-4">
-        <strong>Devarkonda</strong> - It's unfortunate to hear about the poor
-        service experience at OYO Nanda Inn hotel despite good neatness.
-      </p>
-      <button className="text-blue-500 mt-2">See all reviews</button>
+      <div className="bg-white rounded-lg py-6 mt-6 w-full max-w-2xl">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Guest Reviews</h2>
+
+      {hotel.ratings.length === 0|| hotel.ratings.every((rating:any) => Object.keys(rating.user).length === 0) ? (
+        // No Reviews Message
+        <p className="text-gray-500 text-center py-4">No reviews yet</p>
+      ) : (
+        hotel.ratings.map((rating:any, index) => (
+          <div key={index} className="flex items-start space-x-4 border-b pb-4 mb-4 last:border-b-0">
+            {/* User Profile Image */}
+            <img
+              src={rating.user.profileImage}
+              alt={rating.user.firstName}
+              className="w-12 h-12 rounded-full object-cover border"
+            />
+
+            {/* Review Content */}
+            <div className="flex-1">
+              {/* User Name & Rating */}
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold text-gray-900">{rating.user.firstName} {rating.user.lastName}</h3>
+                {/* Star Rating */}
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    i < rating.rating ? 
+                      <FaStar key={i} className="text-yellow-500" /> : 
+                      <FaRegStar key={i} className="text-gray-300" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Text */}
+              <p className="text-gray-700 mt-1">{rating.review}</p>
+            </div>
+          </div>
+        ))
+      )}
+
+      {/* See All Reviews Button */}
+      {hotel.ratings.length >3 && hotel.ratings.every((rating:any) => Object.keys(rating.user).length > 0)? (
+        <button className="text-blue-500 font-medium hover:underline mt-4 w-full text-center">
+          See all reviews
+        </button>
+      ):<></>}
+    </div>
+  
 
       {/* Hotel Policies */}
       <div className="space-y-2 mt-6">

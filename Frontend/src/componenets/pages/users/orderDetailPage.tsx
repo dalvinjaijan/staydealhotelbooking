@@ -22,8 +22,38 @@ const OrderDetailPage: React.FC = () => {
   const { reservationDetails } = useSelector((state: RootState) => state.user) as {
     reservationDetails: ReservationDetails | null;
   };
-  const formattedCheckIn=new Date(reservationDetails?.checkIn)
-  const formattedCheckOut=new Date(reservationDetails?.checkOut)
+  const formattedCheckIn = new Date(reservationDetails?.checkIn);
+  const formattedCheckOut = new Date(reservationDetails?.checkOut);
+  
+  // Extract components for formattedCheckIn
+  const yearIn = formattedCheckIn.getUTCFullYear();
+  const monthIn = (formattedCheckIn.getUTCMonth() + 1).toString(); // Months are 0-based
+  const dayIn = formattedCheckIn.getUTCDate().toString();
+  const hoursIn = formattedCheckIn.getUTCHours();
+  const minutesIn = formattedCheckIn.getUTCMinutes().toString().padStart(2, "0");
+  const secondsIn = formattedCheckIn.getUTCSeconds().toString().padStart(2, "0");
+  
+  // Format hours for 12-hour clock and determine AM/PM
+  const hour12In = hoursIn % 12 || 12; // Convert 0 to 12 for 12-hour format
+  const ampmIn = hoursIn >= 12 ? "PM" : "AM";
+  
+  const formattedDateCheckIn = `${monthIn}/${dayIn}/${yearIn}, ${hour12In}:${minutesIn}:${secondsIn} ${ampmIn}`;
+  console.log("Check-In Date:", formattedDateCheckIn);
+  
+  // Extract components for formattedCheckOut
+  const yearOut = formattedCheckOut.getUTCFullYear();
+  const monthOut = (formattedCheckOut.getUTCMonth() + 1).toString(); // Months are 0-based
+  const dayOut = formattedCheckOut.getUTCDate().toString();
+  const hoursOut = formattedCheckOut.getUTCHours();
+  const minutesOut = formattedCheckOut.getUTCMinutes().toString().padStart(2, "0");
+  const secondsOut = formattedCheckOut.getUTCSeconds().toString().padStart(2, "0");
+  
+  // Format hours for 12-hour clock and determine AM/PM
+  const hour12Out = hoursOut % 12 || 12; // Convert 0 to 12 for 12-hour format
+  const ampmOut = hoursOut >= 12 ? "PM" : "AM";
+  
+  const formattedDateCheckOut = `${monthOut}/${dayOut}/${yearOut}, ${hour12Out}:${minutesOut}:${secondsOut} ${ampmOut}`;
+  console.log("Check-Out Date:", formattedDateCheckOut);
 
 
   return (
@@ -52,7 +82,7 @@ const OrderDetailPage: React.FC = () => {
               </svg>
               <span>Check In:</span>
             </div>
-            <span>{formattedCheckIn.toLocaleString()}</span>
+            <span>{formattedDateCheckIn}</span>
           </div>
           <div className="flex space-x-4 mt-2">
             <div>
@@ -61,7 +91,7 @@ const OrderDetailPage: React.FC = () => {
               </svg>
               <span>Check Out:</span>
             </div>
-            <span>{formattedCheckOut.toLocaleString()}</span>
+            <span>{formattedDateCheckOut}</span>
           </div>
         </div>
 

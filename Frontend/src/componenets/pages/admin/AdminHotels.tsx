@@ -28,7 +28,7 @@ const AdminHotels = () => {
       confirmButtonText:  "Yes, Block",
     }).then((result) => {
       if (result.isConfirmed) {
-        dispatch(blockHotelRequest({hostId,hotelId}))
+        dispatch(blockHotelRequest({hotelId}))
           
           if (message === "hotel blocked") {
             toast.error(message);

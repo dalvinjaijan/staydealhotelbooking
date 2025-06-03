@@ -11,6 +11,8 @@ const bookingSchema = new mongoose_1.default.Schema({
     checkOut: { type: Date },
     hotelId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Hotel", default: null },
     roomId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "RoomCategory", default: null },
+    bookingStatus: { type: String, default: "booked" },
+    bookedAt: { type: Date, default: new Date() },
     paymentMethod: { type: String },
     paymentId: { type: mongoose_1.default.Schema.Types.ObjectId || null, ref: "Payment", default: null },
     noOfGuests: { type: Number },

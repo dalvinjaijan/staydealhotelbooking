@@ -6,8 +6,11 @@ import { RootState,AppDispatch } from '../../../utils/redux/store';
 import { saveUserDetails, userProfile } from '../../../utils/axios/api';
 import {toast} from 'react-toastify'
 import { resetStates } from '../../../utils/redux/slices/userSlice';
+import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
+
+  const navigate=useNavigate()
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -197,7 +200,7 @@ const UserProfile = () => {
   </label>
   <input id="file-input" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 </div>
-          <div className="flex flex-col ml-6 w-2/3">
+          <div className="flex flex-col ml-6 w-1/3">
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Email</label>
               <input disabled
@@ -209,6 +212,7 @@ const UserProfile = () => {
                 } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
               />
             </div>
+           
             <p
               onClick={toggleCompleteProfile}
               className=" font-semibold"
@@ -216,9 +220,14 @@ const UserProfile = () => {
               {isProfileIncomplete ? 'Complete Your Profile' : ''}
             </p>
           </div>
+          <div onClick={()=>navigate('/walletTransactions')}>
+              <img className='w-28' src="/src/assets/walletIcon.png" alt="" />
+              <p>{`wallet balance ${userInfo?.wallet}`}</p>
+            </div>
         </div>
      
           <div className="mt-6 space-y-4">
+            
             <div className='flex gap-4'>
               <div className='w-1/2'>
                 <label className="block text-sm font-medium text-gray-700">First Name</label>

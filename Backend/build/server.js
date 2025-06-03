@@ -16,6 +16,7 @@ const dbConfig_1 = require("./db/dbConfig");
 const path_1 = __importDefault(require("path"));
 const hostRoute_1 = __importDefault(require("./Adapters/routes/host/hostRoute"));
 const adminRoute_1 = __importDefault(require("./Adapters/routes/admin/adminRoute"));
+const socketIo_1 = require("./Utils/webSocket/socketIo");
 // declare module 'express' {
 //     interface Request {
 //         session?: {
@@ -54,9 +55,8 @@ app.use((0, express_session_1.default)({
 }));
 app.use((0, cors_1.default)(corsOptionsDelegate));
 app.use(body_parser_1.default.json());
-console.log('hellko');
+(0, socketIo_1.SocketIntalization)(server);
 console.log("this is path ", __dirname, path_1.default.join(__dirname, '../src/Utils/uploads'));
-console.log('gg');
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../src/Utils/uploads')));
 app.use('/', userRoute_1.default);
 app.use('/host/', hostRoute_1.default);

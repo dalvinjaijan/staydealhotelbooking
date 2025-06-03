@@ -4,14 +4,20 @@ import { CustomRequest } from "../../interfaces/userInterface/iUserInteractor";
 import { NextFunction, Response, Request } from "express";
 import { customError } from "../../middlewares/errorHandling";
 import cloudinaryV2 from "../../../Utils/cloudinary";
+import { IChatInteractor } from "../../interfaces/chatInterface/IChatInteractor";
+import HttpStatus from "../../interfaces/statusCodes";
 
 
 
 export class hostController {
     private interactor: hostInteractorInterface;
+      private  chatInteractor: IChatInteractor
+    
   
-    constructor(interactor: hostInteractorInterface) {
+    constructor(interactor: hostInteractorInterface,chatInteractor:IChatInteractor) {
       this.interactor = interactor;
+    this.chatInteractor=chatInteractor
+
     }
   
     async registerHost(req: CustomRequest, res: Response, next: NextFunction): Promise<void> {
@@ -236,6 +242,176 @@ async editHotelDetails(req:Request,res:Response,next:NextFunction){
   }
 }
 
+async hostProfile(req:Request,res:Response,next:NextFunction){
+  try {
+    const {hostId}=req.query
+    
+    console.log("hostId",hostId)
+    if(typeof hostId==="string"){
+
+ const response=await this.interactor.viewProfile(hostId)
+    
+ if(response)
+  res.status(200).json(response)
+    }
+  } catch (error) {
+    next(error)
+  }
+}
+
+async viewWalletTransactions(req:Request,res:Response,next:NextFunction){
+  try {
+    const {role,id}=req.query
+
+ 
+    console.log("role",role,"userId",id)
+    if(typeof id==="string"){
+      const response=await this.interactor.viewTransactions(id)
+      res.json(response)
+    }
+    // res.json(response)
+  
+  } catch (error) {
+    next(error)
+    
+  }
+}
+async fetchReport(req:Request,res:Response,next:NextFunction){
+  try {
+    const {period,hostId}=req.query
+    if(typeof period==='string' && typeof hostId==='string'){
+      const response=await this.interactor.fetchReportLogic(period,hostId)
+      console.log("period",period)
+      res.json(response)
+    }
+    
+  } catch (error) {
+    next(error)
+  }
+}
+
+async fetchPieReport(req:Request,res:Response,next:NextFunction){
+  try {
+    const {hostId}=req.query
+    if(typeof hostId==='string'){
+      const response=await this.interactor.fetchPieData(hostId)
+      res.json(response)
+    }
+    
+  } catch (error) {
+    next(error)
+  }
+}
+
+async fetchReservations(req:Request,res:Response,next:NextFunction){
+  try {
+    const {type,hostId}=req.query
+    if (typeof type !== "string" || typeof hostId !== "string") {
+      return res.status(400).json({ error: "Invalid type or hostId" });
+    }
+    // console.log("bookingDetails",bookingDetails)
+    const response=await this.interactor.reservations(type,hostId)
+    res.json(response)
+  
+  } catch (error) {
+    next(error)
+    
+  }
+  }
+
+
+
+
+async getChatId(req: Request, res: Response, next: NextFunction) {
+  console.log("chat");
+
+  try {
+    const { hostId, userid } = req.params;
+    console.log(hostId, userid);
+
+    const response = await this.chatInteractor.getChatid(hostId, userid);
+    console.log("ress", response);
+
+    return res.status(HttpStatus.OK).json(response);
+  } catch (error: any) {
+    console.log("56789", error.message);
+
+    next(error);
+  }
+}
+
+async getOneToneChat(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { chatid, whoWantsData } = req.params;
+    const response = await this.chatInteractor.getChatOfOneToOne(
+      chatid,
+      whoWantsData
+    );
+    return res.status(HttpStatus.OK).json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async fetchChat(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { whom, id } = req.params;
+    const response = await this.chatInteractor.fetchChats(whom, id);
+    return res.status(HttpStatus.OK).json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async addMessage(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { sender, chatId, message } = req.body;
+    console.log(chatId);
+
+    const response = await this.chatInteractor.addNewMessage(
+      sender,
+      chatId,
+      message
+    );
+    return res.status(HttpStatus.OK).json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async notificationCountUpdater(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = req.params;
+    const response =
+      await this.interactor.notificationCountUpdater(id);
+    return res.status(HttpStatus.OK).json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async notificationGetter(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+
+    const response =
+      await this.interactor.notificationsGetter(id);
+    return res.status(HttpStatus.OK).json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+
 
 }
+
+
+
+
   

@@ -1,4 +1,4 @@
-import { hostInteractorInterface, LoginSuccessResponse } from "../Adapters/interfaces/hostInterface/iHostInteractor"
+import { hostInteractorInterface, INotifyGetterResponse, LoginSuccessResponse } from "../Adapters/interfaces/hostInterface/iHostInteractor"
 import { hostRepositoryInterface } from "../Adapters/interfaces/hostInterface/iHostRepository"
 import { customError } from "../Adapters/middlewares/errorHandling";
 import { generateAcessToken, generateRefreshToken } from "../Utils/jwt"
@@ -124,4 +124,108 @@ export class hostInteractor implements hostInteractorInterface{
         
       }
     }
+    async viewProfile(hostId:string):Promise<any> {
+      try {
+        const response=await  this.repository.fetchProfileDetails(hostId)
+        return response
+
+      } catch (error) {
+        
+      }
+    }
+
+    async viewTransactions(hostId: string): Promise<any> {
+      try {
+         
+              const response=await this.repository.fetchWalletTransactions(hostId)
+              return response
+          
+      } catch (error) {
+          throw error
+      }
+  }
+
+  async fetchReportLogic(period: string,hostId:string): Promise<any> {
+    try {
+      if(period==="yearly"){
+        const yearlyData=await this.repository.fetchYearlyBookings(hostId)
+        return yearlyData
+      }else if(period==="monthly"){
+        const monthlyData=await this.repository.fetchMonthlyBookings(hostId)
+        return monthlyData
+      }else if(period==="daily"){
+          const dailyData=await this.repository.fetchDailyBookings(hostId)
+          return dailyData
+      }
+    } catch (error) {
+      throw new Error("Error fetching report");
+  
+    }
+  }
+
+  async fetchPieData(hostId:string): Promise<any> {
+    try {
+     
+          const dailyData=await this.repository.fetchPieReport(hostId)
+          return dailyData
+      
+    } catch (error) {
+      throw new Error("Error fetching report");
+  
+    }
+  }
+
+  
+  async reservations(type: string, hostId: string): Promise<any> {
+    try {
+        if (type === "upcoming") {
+            const response = await this.repository.getUpcomingOrders(hostId)
+            return response
+        } else {
+            const response = await this.repository.getCompletedOrders(hostId)
+            return response
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+  async notificationCountUpdater(id: string): Promise<{ count: number }> {
+    try {
+        const response = await this.repository.notificationCountUpdater(id);
+        return response;
+    } catch (error: any) {
+        throw new customError(error.message, error.statusCode);
+    }
+}
+
+async notificationsGetter(
+    id: string
+): Promise<{ notfiyData: INotifyGetterResponse[] | [] }> {
+    try {
+        const response = await this.repository.notificationsGetter(id);
+        console.log("his.providerRepo.notificationsGetter(id)", response);
+
+        if (
+            response.countOfUnreadMessages.length > 0 &&
+            response.notfiyData.length > 0
+        ) {
+            const data: INotifyGetterResponse[] = response.notfiyData.map(
+                (data) => {
+                    const matchedItem = response.countOfUnreadMessages.find(
+                        (item) => item._id + "" === data._id + ""
+                    );
+                    return { ...data, count: matchedItem ? matchedItem.count : 1 };
+                }
+            );
+
+            return { notfiyData: data };
+        }
+        return { notfiyData: [] };
+    } catch (error: any) {
+        throw new customError(error.message, error.statusCode);
+    }
+}
+  
+
 }

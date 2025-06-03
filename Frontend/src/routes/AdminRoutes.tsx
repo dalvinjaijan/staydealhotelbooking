@@ -10,6 +10,8 @@ import ApprovedHotels from '../componenets/pages/admin/ApprovedHotels'
 import RejectedHotels from '../componenets/pages/admin/RejectedHotels'
 import UserManagement from '../componenets/pages/admin/UserManagement'
 import EditHotelRequests from '../componenets/pages/admin/EditHotelRequest'
+import Wallet from '../componenets/pages/admin/Wallet'
+import Complaints from '../componenets/pages/admin/Complaints'
 
 
 const AdminRoutes = () => {
@@ -17,7 +19,7 @@ const AdminRoutes = () => {
     <Routes>
       <Route path='/' element={<AdminHeader />}>
         <Route path='/login' element={<AdminLogin />} />
-        <Route element={<AdminProtectedRoutes />}>
+        <Route element={<AdminProtectedRoutes role={'admin'} />}>
           <Route path='/dashBoard' element={<AdminDashboard />} />
           <Route path='/hotels' element={<AdminHotels />} />
       <Route path='/manageHotelRequest' element={<ManageHotelRequest />} />
@@ -25,6 +27,12 @@ const AdminRoutes = () => {
       <Route path='/getRejectedHotels' element={<RejectedHotels />} />
       <Route path='/users' element={<UserManagement />} />
       <Route path='/hotelEditRequest' element={<EditHotelRequests />} />
+      <Route path='/wallet' element={<Wallet />} />
+      <Route path='/complaints' element={<Complaints/>} />
+
+      
+
+      
       </Route>
       </Route>
     </Routes>

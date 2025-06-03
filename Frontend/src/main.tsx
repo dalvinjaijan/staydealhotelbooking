@@ -16,6 +16,7 @@ import { ReactNode } from 'react';
 import PlacesContextFunction from './context/placesContext.tsx'
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from '@stripe/react-stripe-js'
+import { SocketProvider } from './context/socketio.tsx'
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 interface ErrorBoundaryProps {
@@ -62,7 +63,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <BrowserRouter>
         <Elements stripe={stripePromise}>
             <ToastContainer pauseOnHover={false} position="bottom-right"/>
-                <App />
+            <SocketProvider>
+            <App />
+
+            </SocketProvider>
                 </Elements>
         </BrowserRouter>
       </ErrorBoundary>

@@ -6,7 +6,7 @@ import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 
 const AddGuestDetails = () => {
-    const {bookingDetails}=useSelector((state: RootState) => state.user)
+    const {bookingDetails,userInfo}=useSelector((state: RootState) => state.user)
     const dispatch =useDispatch<AppDispatch>()
     const navigate=useNavigate()
 
@@ -17,6 +17,10 @@ const AddGuestDetails = () => {
     const [email,setEmail]=useState<string>("")
     const [phone,setPhone]=useState<string>("")
     const [country,setCountry]=useState<string|HTMLOptionElement>("India")
+    const [bookingForOption,setBookingForOption]=useState("bookForMe")
+     const handleBookChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setBookingForOption(e.target.value);
+      };
 
     const [errors, setErrors] = useState({ name: "", email: "", phone: "" });
 
@@ -74,8 +78,15 @@ const chekOutFormattedDate = checkOutDateObject.toLocaleDateString("en-US", {
   month: "short",
   year: "numeric",
 });
-    console.log("type of date",bookingDetails?.checkIn, typeof bookingDetails?.checkIn)
 
+const handleBookForMe=()=>{
+  const name=`${userInfo?.firstName} ${userInfo?.lastName}`
+  const email=userInfo?.email
+  const phone=userInfo?.phone
+  const country="India"
+  dispatch(saveGuestDetails({name,email,country,phone}))
+  navigate('/paymentMethod')
+}
 
     return (
 
@@ -83,7 +94,42 @@ const chekOutFormattedDate = checkOutDateObject.toLocaleDateString("en-US", {
       <Header />
        <div className="flex flex-col lg:flex-row gap-x-10 justify-center p-6 mt-16">
           {/* Left Section */}
-          <div className="border rounded-lg p-6 bg-gray-50 shadow-md w-full lg:w-1/2 mb-4 lg:mb-0">
+
+          <div className='flex:row mb-4 lg:mborder rounded-lg p-6 bg-gray-50 shadow-md w-full lg:w-1/2 b-0'>
+
+          <div className="space-y-4">
+            {/* Radio button for Book for me */}
+            <div>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="bookingForOption"
+                  value="bookForMe"
+                  checked={bookingForOption === "bookForMe"}
+                  onChange={handleBookChange}
+                  className="mr-2"
+                />
+                Book for me
+              </label>
+            </div>
+
+            {/* Radio button for Bokk for Another */}
+            <div>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="bookingForOption"
+                  value="bookForAnother"
+                  checked={bookingForOption === "bookForAnother"}
+                  onChange={handleBookChange}
+                  className="mr-2"
+                />
+                Book for another
+              </label>
+            </div>
+          </div>
+          {bookingForOption==="bookForAnother" ?
+          (<div className=" mb-4 lg:mborder rounded-lg p-6 bg-gray-50 shadow-md w-full lg:w-1/2b-0">
             <h2 className="text-xl font-semibold mb-4">Enter your details</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -158,7 +204,18 @@ const chekOutFormattedDate = checkOutDateObject.toLocaleDateString("en-US", {
                 Continue
               </button>
             </form>
+          </div>): 
+           <button
+           onClick={handleBookForMe}
+           className="mt-4 w-1/3 bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700"
+         >
+           Continue
+         </button>}
+
           </div>
+
+          
+          
     
           {/* Right Section */}
           <div  className="border rounded-lg p-6 bg-gray-50 shadow-md w-full lg:w-1/3">
@@ -185,13 +242,13 @@ const chekOutFormattedDate = checkOutDateObject.toLocaleDateString("en-US", {
                  <span>Rooms: {bookingDetails.numberOfRooms}</span>
                </div>
                <div className="flex justify-between">
-                 <span>Price</span>
+                 <span>Price / night</span>
                  <span>{bookingDetails.roomPrice}</span>
                </div>
-               {/* <div className="flex justify-between text-red-500">
-                 <span>Coupon Discount</span>
-                 <span>{bookingDetails.couponDiscount.toFixed(2)}</span>
-               </div> */}
+               <div className="flex justify-between ">
+                 <span>No of days</span>
+                 <span>{bookingDetails.noOfDays}</span>
+               </div>
                <hr className="my-2" />
                <div className="flex justify-between font-semibold">
                  <span>Total Amount</span>

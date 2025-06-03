@@ -11,6 +11,8 @@ import { connectDB } from './db/dbConfig'
 import path from 'path'
 import hostRouter from './Adapters/routes/host/hostRoute'
 import adminRouter from './Adapters/routes/admin/adminRoute'
+import { Server } from 'socket.io'
+import { SocketIntalization } from './Utils/webSocket/socketIo'
 
 // declare module 'express' {
 //     interface Request {
@@ -61,11 +63,14 @@ app.use( session({
 app.use(cors(corsOptionsDelegate));
 
 
+
+
 app.use(bodyParser.json());
-console.log('hellko');
+SocketIntalization(server)
+
 
 console.log("this is path ",__dirname,path.join(__dirname,'../src/Utils/uploads'));
-console.log('gg');
+
 
 app.use('/uploads', express.static(path.join(__dirname,'../src/Utils/uploads')));
 

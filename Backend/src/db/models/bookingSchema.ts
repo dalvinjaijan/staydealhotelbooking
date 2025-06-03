@@ -7,11 +7,13 @@ const bookingSchema= new mongoose.Schema({
     checkOut:{type:Date},
     hotelId:{type:mongoose.Schema.Types.ObjectId,ref:"Hotel",default:null},
     roomId:{type:mongoose.Schema.Types.ObjectId,ref:"RoomCategory",default:null},
+    bookingStatus:{type:String,default:"booked"},
+    bookedAt:{type:Date,default:new Date()},
     paymentMethod:{type:String},
     paymentId:{type:mongoose.Schema.Types.ObjectId||null,ref:"Payment",default:null},
     noOfGuests:{type:Number},
     noOfRooms:{type:Number},
-    roomNumbers:{type:[String],default[]},
+    roomNumbers:{type:[String],default:[]},
     totalAmount:{type:Number},
 
     GuestDetails:{

@@ -1,4 +1,4 @@
-import { Types } from "mongoose"
+import { Types,ObjectId } from "mongoose"
 import { bookingHotelDetails } from "./iUserInteractor"
 
 export interface userRepositoryInterface{
@@ -8,13 +8,25 @@ export interface userRepositoryInterface{
     findUserById(userId:string):Promise<any>
     saveUserDetails(user:any,userDetails:any,profileImage:string):Promise<any>
     getUserDetails(email:string):Promise<any>
-    searchHotels(data:searchHotelsData):Promise<any>
+    searchHotels(updatedData:searchHotelsData):Promise<any>
     fetchFilteredHotels(data:filterHotelsData):Promise<any>
     getHotelDetails(data:dataForBookingHotel):Promise<any>
     fetchHotelDetails(data:dataForBookingHotel):Promise<any>
     reserveRoom(bookingDetails:bookingHotelDetails):Promise<any>
     getUpcomingOrders(userId:string):Promise<any>
     getCompletedOrders(userId:string):Promise<any>
+    fetchWalletTransactions(userId:string):Promise<any>
+    fullRefund(bookingId:string):Promise<string>
+    partialRefund(bookingId:string):Promise<string>
+    noRefund(bookingId:string):Promise<string>
+    rateTheHotel(data:{rating:number,review:string,bookingId:string,userId:string,hotelId:string}):Promise<any>
+    reportHotel(data:{complaint:string,bookingId:string,userId:string,hotelId:string}):Promise<any>
+    notificationCountUpdater(id: string): Promise<{ count: number }>;
+    notificationsGetter(id: string): Promise<{
+        notfiyData: NotifyGetterResponse[] | [];
+        countOfUnreadMessages: UnreadMessageCount[] | [];
+    }>;
+
 
 }
 
@@ -42,10 +54,63 @@ export interface dataForBookingHotel{
     },
     numberOfRooms:number,
     totalGuests:number,
-    checkIn:Date,
-    checkOut:Date,
+    checkIn:string,
+    checkOut:Date|string,
     searchTerm:string,
     hotelId:string,
     roomId:string,
     guestNumber:number
+}
+
+export interface NotifyGetterResponse{
+  
+    _id: ObjectId,
+    hostId: ObjectId,
+    userId: ObjectId,
+    createdAt:Date,
+    updatedAt:Date,
+    latestMessage: ObjectId,
+    message: {
+      _id: ObjectId,
+      sender: 'host',
+      chatId: ObjectId,
+      message: string,
+      hostdelete: boolean,
+      userdelete: boolean,
+      seen: boolean,
+      createdAt: Date,
+      updatedAt: Date,
+      
+    }
+  
+}
+
+export interface UnreadMessageCount {
+  _id:ObjectId
+  count:number
+}
+
+
+export interface INotifyGetterResponse{
+  
+  _id: ObjectId,
+  hostId: ObjectId,
+  userId: ObjectId,
+  createdAt:Date,
+  updatedAt:Date,
+  latestMessage: ObjectId,
+  count:number,
+  message: {
+    _id: ObjectId,
+    sender: 'host',
+    chatId: ObjectId,
+    message: string,
+    hostdelete: boolean,
+    userdelete: boolean,
+    seen: boolean,
+    createdAt: Date,
+    updatedAt: Date,
+    
+  }
+
 }

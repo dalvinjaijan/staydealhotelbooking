@@ -66,9 +66,9 @@ class adminInteractor {
         catch (error) {
         }
     }
-    async blockhotel(hostId, hotelId) {
+    async blockhotel(hotelId) {
         try {
-            const response = await this.repository.blockHotel(hostId, hotelId);
+            const response = await this.repository.blockHotel(hotelId);
             return response;
         }
         catch (error) {
@@ -133,6 +133,44 @@ class adminInteractor {
         }
         catch (error) {
             throw new Error("Error fetching hotel requests");
+        }
+    }
+    async getWalletDetails() {
+        try {
+            const response = await this.repository.fetchWalletDetails();
+            if (response)
+                return response;
+        }
+        catch (error) {
+            throw new Error("Error fetching wallet Details");
+        }
+    }
+    async fetchReportLogic(period) {
+        try {
+            if (period === "yearly") {
+                const yearlyData = await this.repository.fetchYearlyBookings();
+                return yearlyData;
+            }
+            else if (period === "monthly") {
+                const monthlyData = await this.repository.fetchMonthlyBookings();
+                return monthlyData;
+            }
+            else if (period === "daily") {
+                const dailyData = await this.repository.fetchDailyBookings();
+                return dailyData;
+            }
+        }
+        catch (error) {
+            throw new Error("Error fetching report");
+        }
+    }
+    async fetchComplaint() {
+        try {
+            const response = await this.repository.fetchComplaints();
+            return response;
+        }
+        catch (error) {
+            throw new Error("Error fetching report");
         }
     }
 }

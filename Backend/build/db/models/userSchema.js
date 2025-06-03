@@ -4,6 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const walletTransactionType = new mongoose_1.default.Schema({
+    date: { type: Date },
+    type: { type: String },
+    totalAmount: { type: Number },
+    amoubntRecieved: { type: Number },
+    bookingId: { type: String },
+});
 const userSchema = new mongoose_1.default.Schema({
     email: {
         type: String,
@@ -27,6 +34,13 @@ const userSchema = new mongoose_1.default.Schema({
     isBlocked: {
         type: Boolean,
         default: false
+    },
+    wallet: {
+        type: Number,
+        default: 0
+    },
+    walletTransaction: {
+        type: [walletTransactionType]
     }
 });
 const User = mongoose_1.default.model("User", userSchema);

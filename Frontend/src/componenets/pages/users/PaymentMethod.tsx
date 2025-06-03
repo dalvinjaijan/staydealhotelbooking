@@ -60,7 +60,10 @@ const PaymentMethod = () => {
         amount: bookingDetails?.totalAmount,
         currency: "inr",
         description: `Booking for ${bookingDetails?.roomType}`,
-      });
+      },
+    {
+      withCredentials:true
+    });
 
       const { id: sessionId } = response.data;
       console.log("sessionId",sessionId)
@@ -183,8 +186,12 @@ const PaymentMethod = () => {
                   <span>Rooms: {bookingDetails.numberOfRooms}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Price</span>
+                  <span>Price / night</span>
                   <span>{bookingDetails.roomPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>No of days</span>
+                  <span>{bookingDetails.noOfDays}</span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-semibold">

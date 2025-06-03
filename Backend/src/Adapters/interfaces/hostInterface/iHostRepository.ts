@@ -9,6 +9,21 @@ export interface hostRepositoryInterface{
     findHostById(hostid:string):Promise<HostDocument>
     fetchHotels(hostId:any):Promise<any>
     addingEditedhotelData(editedData:any,hostId:string):Promise<any>
+    fetchProfileDetails(hostId:string):Promise<any>
+    fetchWalletTransactions(hostId:string):Promise<any>
+    fetchYearlyBookings(hostId:string):Promise<any>
+    fetchMonthlyBookings(hostId:string):Promise<any>
+    fetchDailyBookings(hostId:string):Promise<any>
+    fetchPieReport(hostId:string):Promise<any>
+    getUpcomingOrders(hostId:string):Promise<any>
+    getCompletedOrders(hostId:string):Promise<any>
+
+    notificationCountUpdater(id: string): Promise<{ count: number }>;
+    notificationsGetter(id: string): Promise<{
+      notfiyData: NotifyGetterResponse[] | [];
+      countOfUnreadMessages: UnreadMessageCount[] | [];
+    }>;
+
 }
 
 
@@ -20,6 +35,26 @@ export interface hostRepositoryInterface{
 //     state: string | null;
 //     pincode: string | null;
 // }
+
+export interface NotifyGetterResponse {
+    _id: ObjectId;
+    hostId: ObjectId;
+    userId: ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+    latestMessage: ObjectId;
+    message: {
+      _id: ObjectId;
+      sender: "user";
+      chatId: ObjectId;
+      message: string;
+      hostdelete: boolean;
+      userdelete: boolean;
+      seen: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+  }
 
 export interface RoomCategory extends Types.Subdocument {
     roomType: string | null;
@@ -72,3 +107,8 @@ export interface EditedData {
   }
 
 export interface HostDocument extends HostInterface, Document {}
+
+export interface UnreadMessageCount {
+    _id: ObjectId;
+    count: number;
+  }

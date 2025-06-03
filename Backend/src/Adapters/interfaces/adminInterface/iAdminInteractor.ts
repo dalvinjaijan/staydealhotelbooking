@@ -6,7 +6,7 @@ export interface adminInteractorInterface{
     getHotelRequests():Promise<any>
     approvehotelRequests(hostId:string,hotelId:string):Promise<any>
     getApprovedHotel():Promise<any>
-    blockhotel(hostId:string,hotelId:string):Promise<any>
+    blockhotel(hotelId:string):Promise<any>
     getRejectedHotel():Promise<any>
     getUsers():Promise<any>
     blockuser(userId:string):Promise<any>
@@ -14,6 +14,10 @@ export interface adminInteractorInterface{
     getEditedHotelRequests():Promise<any>
     rejectEditHotelRequests(hostId:string,hotelId:string):Promise<any>
     approveEditHotelsRequest(hostId:string,hotelId:string):Promise<any>
+    getWalletDetails():Promise<any>
+    fetchReportLogic(period:string):Promise<any>
+    fetchComplaint():Promise<any>
+
 
 }
 

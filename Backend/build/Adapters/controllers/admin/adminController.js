@@ -71,9 +71,8 @@ class adminController {
     }
     async blockHotel(req, res, next) {
         try {
-            const { hostId, hotelId } = req.body;
-            console.log("hostId", typeof hostId, typeof hotelId);
-            const response = await this.interactor.blockhotel(hostId, hotelId);
+            const { hotelId } = req.body;
+            const response = await this.interactor.blockhotel(hotelId);
             console.log("response approving", response);
             res.status(200).json({ message: "hotel blocked", response });
         }
@@ -151,6 +150,38 @@ class adminController {
             console.log("approve edit hotels", hotelId, hostId);
             const response = await this.interactor.approveEditHotelsRequest(hostId, hotelId);
             res.status(200).json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async walletDetails(req, res, next) {
+        try {
+            const response = await this.interactor.getWalletDetails();
+            console.log("response", response);
+            res.json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async fetchReport(req, res, next) {
+        try {
+            const { period } = req.query;
+            if (typeof period === 'string') {
+                const response = await this.interactor.fetchReportLogic(period);
+                console.log("period", period);
+                res.json(response);
+            }
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async fetchComplaints(req, res, next) {
+        try {
+            const response = await this.interactor.fetchComplaint();
+            res.json(response);
         }
         catch (error) {
             next(error);

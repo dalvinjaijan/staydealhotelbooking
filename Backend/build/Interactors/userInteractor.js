@@ -79,9 +79,9 @@ class userInteractor {
             throw error;
         }
     }
-    async getHotels(data) {
+    async getHotels(updatedData) {
         try {
-            const response = await this.repository.searchHotels(data);
+            const response = await this.repository.searchHotels(updatedData);
             return response;
         }
         catch (error) {
@@ -134,6 +134,67 @@ class userInteractor {
                 const response = await this.repository.getCompletedOrders(userId);
                 return response;
             }
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async viewTransactions(userId) {
+        try {
+            const response = await this.repository.fetchWalletTransactions(userId);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async cancelLogic(bookingId, roomPolicies, checkInDate, checkOutDate) {
+        try {
+            console.log("checkInDate", checkInDate);
+            let checkInTime = roomPolicies.checkIn.slice(0, 2);
+            let checkInDateOnly = checkInDate.slice(0, 11);
+            let correctedCheckInDate = `${checkInDateOnly}${checkInTime}:00:00.000z`;
+            console.log("checkInDateSplit", correctedCheckInDate);
+            let checkInDateObject = new Date(checkInDate);
+            console.log("checkInDateObject", checkInDateObject);
+            let istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+            const currentDate = new Date();
+            const currentDateIST = new Date(currentDate.getTime() + istOffset);
+            // Calculate the difference in milliseconds
+            const differenceInMs = checkInDateObject.getTime() - currentDateIST.getTime();
+            // Convert the difference to days
+            const differenceInDays = differenceInMs / (1000 * 60 * 60 * 24);
+            console.log("Difference in Days:", differenceInDays);
+            if (differenceInDays > 2) {
+                const response = await this.repository.fullRefund(bookingId);
+                return response;
+            }
+            else if (differenceInDays >= 0 && differenceInDays <= 2) {
+                const response = await this.repository.partialRefund(bookingId);
+                return response;
+            }
+            else {
+                const response = await this.repository.noRefund(bookingId);
+                return response;
+            }
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async rateTheHotel(data) {
+        try {
+            const response = await this.repository.rateTheHotel(data);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async reporthotel(data) {
+        try {
+            const response = await this.repository.reportHotel(data);
+            return response;
         }
         catch (error) {
             throw error;

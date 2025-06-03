@@ -5,6 +5,7 @@ import { AdminAuthstate } from "../../interfaces"
 const initialState:AdminAuthstate={
     adminInfo:{
         accessToken: null,
+        role:"",
         adminId:null,
         email:null,
         name:null,
@@ -40,7 +41,7 @@ const adminSlice=createSlice({
 
             state.adminInfo = {
               accessToken: accessToken || state.adminInfo?.accessToken || null,
-              
+              role:"admin",
               adminId:adminDetails._id,
               email:adminDetails.email,
               name:adminDetails.lastName,
