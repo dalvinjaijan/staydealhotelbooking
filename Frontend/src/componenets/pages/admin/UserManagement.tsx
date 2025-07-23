@@ -9,6 +9,7 @@ const UserManagement = () => {
 
     const dispatch:AppDispatch=useDispatch<AppDispatch>()
     const {users,message}=useSelector((state:RootState)=>state.admin)
+    const [page,setPage]=useState<number>(1)
     const handleClick=(userId:string,index:number)=>{
         const user = users? users[index] :[];
         Swal.fire({
@@ -40,8 +41,8 @@ const UserManagement = () => {
   
 
     useEffect(()=>{
-        dispatch(fetchUsers())
-    },[message])
+        dispatch(fetchUsers(page))
+    },[message,page])
   return (
     <div>
       <h3 className='text-xl ml-8 mt-3 font-semibold mb-4'>Users</h3>
@@ -61,8 +62,8 @@ const UserManagement = () => {
             {
                 users && users.map((user,index)=>{
                     return(
-                        <tr className="hover:bg-gray-100">
-                            <td className="p-2 border">{index+1}</td>
+                        <tr className="hover:bg-gray-100" key={index}>
+                    <td className="p-2 border">{6*(page-1)+(index+1)}</td>
                     <td className="p-2 border">{user?.firstName && user?.lastName ?  user?.firstName+" "+user?.lastName : 'N/A'}</td>
                     <td className="p-2 border">{user?.email}</td>
                     <td className="p-2 border">{user?.phone ?  user?.phone : 'N/A'}</td>
@@ -86,6 +87,18 @@ const UserManagement = () => {
             {/* Additional rows as needed */}
         </tbody>
         </table>
+      </div>
+      <div className='flex mt-2 space-x-2 justify-center'>
+        <button className='px-2 py-1 bg-blue-600 text-white'
+        onClick={()=>setPage(prev=>prev-1)}
+        disabled={page===1}>
+          &lt;- prev
+        </button>
+         <button className='px-2 py-1 bg-blue-600 text-white'
+         onClick={()=>setPage(prev=>prev+1)}
+         disabled={!users||users.length<6}>
+          next -&gt;
+        </button>
       </div>
     </div>
   )

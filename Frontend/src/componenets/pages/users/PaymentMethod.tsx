@@ -6,7 +6,7 @@ import Header from "./Header";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { saveSessionId } from "../../../utils/redux/slices/userSlice";
-import { bookRoom } from "../../../utils/axios/api";
+import { bookRoom, stripeRequest } from "../../../utils/axios/api";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -56,15 +56,8 @@ const PaymentMethod = () => {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:3001/create-checkout-session", {
-        amount: bookingDetails?.totalAmount,
-        currency: "inr",
-        description: `Booking for ${bookingDetails?.roomType}`,
-      },
-    {
-      withCredentials:true
-    });
-
+      if(bookingDetails?.totalAmount){
+      const response = await stripeRequest(bookingDetails?.totalAmount,bookingDetails?.roomType)
       const { id: sessionId } = response.data;
       console.log("sessionId",sessionId)
       if(sessionId){
@@ -83,6 +76,8 @@ const PaymentMethod = () => {
         console.error("Stripe redirectToCheckout error:", error.message);
         setError("Failed to redirect to Stripe Checkout.");
       }
+      }
+    
     } catch (err: any) {
       console.error("Payment initiation error:", err.message);
       setError("Something went wrong. Please try again.");
@@ -193,6 +188,18 @@ const PaymentMethod = () => {
                   <span>No of days</span>
                   <span>{bookingDetails.noOfDays}</span>
                 </div>
+                    {bookingDetails.discount > 0 && <div>
+                   <div className="flex justify-between ">
+                 <span>Room price</span>
+                 <span>{bookingDetails.totalRoomPrice}</span>
+               </div>
+                  <div className="flex justify-between mt-2 ">
+                 <span>Discount</span>
+                 <span>-{bookingDetails.discount}</span>
+               </div>
+                
+                </div>
+               }
                 <hr className="my-2" />
                 <div className="flex justify-between font-semibold">
                   <span>Total Amount</span>

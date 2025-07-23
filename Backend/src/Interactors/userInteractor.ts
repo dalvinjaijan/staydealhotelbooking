@@ -1,6 +1,6 @@
 
 
-import { bookingHotelDetails, userInteractorInterface } from "../Adapters/interfaces/userInterface/iUserInteractor";
+import { bookingHotelDetails, latLng, userInteractorInterface } from "../Adapters/interfaces/userInterface/iUserInteractor";
 import { dataForBookingHotel, filterHotelsData, INotifyGetterResponse, searchHotelsData, userRepositoryInterface } from "../Adapters/interfaces/userInterface/iUserRepositoryInterface";
 import { generateAcessToken, generateRefreshToken } from "../Utils/jwt";
 import { sendMail } from "../Utils/nodemailer";
@@ -253,6 +253,32 @@ export class userInteractor implements userInteractorInterface {
 //       throw new customError(error.message, error.statusCode);
 //     }
 //   }
+
+async getTopRatedHotels(latLng: latLng): Promise<any> {
+    try {
+        const response=await this.repository.fetchTopRatedHotels(latLng)
+        return response
+    } catch (error) {
+        throw error
+    }
+}
+
+async getCoupon(city: string): Promise<any> {
+    try {
+        const response=await this.repository.fetchCoupons(city)
+        return response
+    } catch (error) {
+        throw error
+    }
+}
+async checkCoupon(code: string, purchaseAmount: number): Promise<any> {
+    try {
+        const response=await this.repository.applyCoupon(code,purchaseAmount)
+        return response
+    } catch (error) {
+        throw error
+    }
+}
 
 
 } 

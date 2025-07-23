@@ -35,7 +35,12 @@ userRouter.patch('/cancelBooking',verifyAccessToken('user'),verifyRole(['user'])
 userRouter.get('/wallet-transactions',verifyAccessToken('user'),verifyRole(['user']),controller.viewWalletTransactions.bind(controller))
 userRouter.post('/rating',verifyAccessToken('user'),verifyRole(['user']),controller.ratingAndReview.bind(controller))
 userRouter.post('/reportHotel',verifyAccessToken('user'),verifyRole(['user']),controller.reportHotel.bind(controller))
+userRouter.get('/coupons',controller.fetchCoupon.bind(controller))
+userRouter.post('/applyCoupon',controller.applyCoupon.bind(controller))
 
+
+
+userRouter.get('/topRatedProperties',controller.fetchTopRatedHotels.bind(controller))
 userRouter.get(
     "/getChatId/:hostId/:userId",
     controller.getChatId.bind(controller)

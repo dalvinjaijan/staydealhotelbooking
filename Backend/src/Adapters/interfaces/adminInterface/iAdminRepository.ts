@@ -1,3 +1,5 @@
+import { Coupons } from "./iAdminInteractor"
+
 export interface adminRepositoryInterface{
     findByEmail(email:string):Promise<any>
     findHotelRequest():Promise<any>
@@ -5,7 +7,7 @@ export interface adminRepositoryInterface{
     findApprovedHotel():Promise<any>
     blockHotel(hotelId:string):Promise<any>
     findRejectedHotel():Promise<any>
-    fetchUsers():Promise<any>
+    fetchUsers(pageNumber:number):Promise<any>
     blockUser(userId:string):Promise<any>
     unBlockUser(userId:string):Promise<any>
     findEditedHotelRequest():Promise<any>
@@ -16,6 +18,8 @@ export interface adminRepositoryInterface{
     fetchMonthlyBookings():Promise<any>
     fetchDailyBookings():Promise<any>
     fetchComplaints():Promise<any>
+    addCoupon(data:Coupons):Promise<string>
+    fetchCoupon(pageNumber:number):Promise<Coupons[]|string>
 
 
 }

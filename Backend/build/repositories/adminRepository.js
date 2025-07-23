@@ -12,6 +12,7 @@ const roomSchema_1 = __importDefault(require("../db/models/roomSchema"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const bookingSchema_1 = __importDefault(require("../db/models/bookingSchema"));
 const reportSchema_1 = __importDefault(require("../db/models/reportSchema"));
+const CouponSchema_1 = __importDefault(require("../db/models/CouponSchema"));
 dotenv_1.default.config();
 class adminRepository {
     adminDb;
@@ -20,6 +21,7 @@ class adminRepository {
     hotelDb;
     bookingDb;
     reportDb;
+    couponDb;
     constructor() {
         this.adminDb = adminSchema_1.default;
         this.hostDb = hostSchema_1.default;
@@ -27,6 +29,7 @@ class adminRepository {
         this.hotelDb = hotelSchema_1.default;
         this.bookingDb = bookingSchema_1.default;
         this.reportDb = reportSchema_1.default;
+        this.couponDb = CouponSchema_1.default;
     }
     async findByEmail(email) {
         const isAdminExist = await this.adminDb.findOne({ email });
@@ -182,9 +185,14 @@ class adminRepository {
             throw new Error("Error fetching hotel requests");
         }
     }
-    async fetchUsers() {
+    async fetchUsers(pageNumber) {
         try {
-            const response = await this.userDb.find();
+            const limit = 6;
+            const skip = limit * (pageNumber - 1);
+            const response = await this.userDb.find()
+                .sort({ _id: -1 })
+                .skip(skip)
+                .limit(limit);
             console.log("users", response);
             return response;
         }
@@ -467,6 +475,52 @@ class adminRepository {
         catch (error) {
             console.error("Error fetching complaints:", error);
             throw error;
+        }
+    }
+    async addCoupon(data) {
+        try {
+            console.log("city", data.city, "data", data);
+            if (typeof data.offerPercentage == "string" && typeof data.maxDiscount == "string" && typeof data.minPurchase == 'string') {
+                const offerPercentage = parseInt(data.offerPercentage);
+                const validity = new Date(data.validity);
+                const maxDiscount = parseInt(data.maxDiscount);
+                const minPurchase = parseInt(data.minPurchase);
+                await this.couponDb.create({
+                    city: data.city ?? null,
+                    code: data.code,
+                    description: data.description,
+                    validity,
+                    offerPercentage,
+                    maxDiscount,
+                    minPurchase
+                });
+                return "Coupon added successfully";
+            }
+            else {
+                return "Having trouble in adddnig coupon";
+            }
+        }
+        catch (error) {
+            throw new Error("Having trouble in adddnig coupon");
+        }
+    }
+    async fetchCoupon(pageNumber) {
+        try {
+            const limit = 8;
+            const skip = (pageNumber - 1) * limit;
+            const result = await this.couponDb.find({ validity: { $gte: new Date() } }, { _id: 0 })
+                .sort({ _id: -1 })
+                .skip(skip)
+                .limit(limit);
+            if (result.length > 0) {
+                return result;
+            }
+            else {
+                return "No active coupons available";
+            }
+        }
+        catch (error) {
+            throw new Error("Having trouble in fetching coupons");
         }
     }
 }

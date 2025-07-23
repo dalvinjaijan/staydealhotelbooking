@@ -30,6 +30,11 @@ const AdminNavBar = () => {
           setSelectedToggle('hotels')
           navigate('/admin/hotels')
         }}>Hotels</li>
+        <li className={`hover:bg-white ${selectedToggle==="coupons" ?  "bg-white text-navbar-green" :""} hover:text-navbar-green cursor-pointer px-4 py-2 rounded-md transition-all`}
+        onClick={()=>{
+          setSelectedToggle('coupons')
+          navigate('/admin/coupons')
+        }}>Coupons</li>
 
 <li className={`hover:bg-white ${selectedToggle==="wallet" ?  "bg-white text-navbar-green" :""} hover:text-navbar-green cursor-pointer px-4 py-2 rounded-md transition-all`}
         onClick={()=>{

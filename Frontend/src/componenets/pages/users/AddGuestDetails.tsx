@@ -249,6 +249,18 @@ const handleBookForMe=()=>{
                  <span>No of days</span>
                  <span>{bookingDetails.noOfDays}</span>
                </div>
+                {bookingDetails.discount > 0 && <div>
+                   <div className="flex justify-between ">
+                 <span>Room price</span>
+                 <span>{bookingDetails.totalRoomPrice}</span>
+               </div>
+                  <div className="flex justify-between mt-2 ">
+                 <span>Discount</span>
+                 <span>-{bookingDetails.discount}</span>
+               </div>
+                
+                </div>
+               }
                <hr className="my-2" />
                <div className="flex justify-between font-semibold">
                  <span>Total Amount</span>

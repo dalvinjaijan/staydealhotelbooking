@@ -406,6 +406,37 @@ async myBooking(req:Request,res:Response,next:NextFunction){
           }
           }
 
+          async fetchCoupon(req: Request, res: Response, next: NextFunction){
+            try {
+              const {city}=req.query
+              console.log("city",city)
+              if(typeof city!=="string")
+                throw new Error("Invalid city")
+              const response=await this.interactor.getCoupon(city)
+              res.status(200).json( response );
+
+            } catch (error) {
+              next(error)
+            }
+          }
+
+            async applyCoupon(req: Request, res: Response, next: NextFunction){
+            try {
+              const {code,purchaseAmount}=req.body
+              console.log("code and amount",code,purchaseAmount)
+              if(typeof code!=="string")
+                throw new Error("Invalid city")
+              const response=await this.interactor.checkCoupon(code,purchaseAmount)
+              res.status(200).json( response );
+
+            } catch (error) {
+              next(error)
+            }
+          }
+
+
+          //chat
+
           async getChatOfOneToOne(req: Request, res: Response, next: NextFunction) {
             try {
               const { chatId, whoWantsData } = req.params;
@@ -482,6 +513,22 @@ async myBooking(req:Request,res:Response,next:NextFunction){
           //   }
           // }
 
+
+          async fetchTopRatedHotels(req: Request, res: Response, next: NextFunction) {
+            try {
+              const {lngLat} = req.query;
+              console.log("lng",lngLat)
+            if(typeof lngLat==="string"){
+              const parsedLatLng=JSON.parse(lngLat)
+              const response = await this.interactor.getTopRatedHotels(parsedLatLng);
+              return res.status(HttpStatus.OK).json(response);
+
+
+            }
+            } catch (error) {
+              next(error);
+            }
+          }
 
 
 }   

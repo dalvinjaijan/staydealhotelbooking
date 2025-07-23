@@ -7,6 +7,8 @@ import RoomCategory from "../db/models/roomSchema"
 import dotenv from "dotenv";
 import Booking from "../db/models/bookingSchema"
 import Report from "../db/models/reportSchema"
+import Coupon from "../db/models/CouponSchema"
+import { Coupons } from "../Adapters/interfaces/adminInterface/iAdminInteractor"
 
 dotenv.config();
 
@@ -20,13 +22,7 @@ export class adminRepository implements adminRepositoryInterface{
     private hotelDb:typeof Hotel
     private bookingDb:typeof Booking
     private reportDb:typeof Report
-    
-    
-
-
-
-    
-
+    private couponDb:typeof Coupon
     constructor(){
         this.adminDb=Admin
         this.hostDb=Host
@@ -34,6 +30,7 @@ export class adminRepository implements adminRepositoryInterface{
         this.hotelDb=Hotel
         this.bookingDb=Booking
         this.reportDb=Report
+        this.couponDb=Coupon
     }
     async findByEmail(email: string): Promise<any> {
         const isAdminExist=await this.adminDb.findOne({email})
@@ -199,9 +196,14 @@ export class adminRepository implements adminRepositoryInterface{
         }
 }
 
-async fetchUsers(): Promise<any> {
+async fetchUsers(pageNumber:number): Promise<any> {
   try {
-      const response=await this.userDb.find();
+    const limit=6
+    const skip=limit*(pageNumber-1)
+      const response=await this.userDb.find()
+      .sort({_id:-1})
+      .skip(skip)
+      .limit(limit);
         console.log("users",response)
      
         return response;
@@ -552,6 +554,51 @@ async fetchComplaints(): Promise<any> {
   }
 }
 
+async addCoupon(data: Coupons): Promise<string> {
+  try {
+    console.log("city",data.city,"data",data)
+    if(typeof data.offerPercentage=="string" && typeof data.maxDiscount=="string" && typeof data.minPurchase=='string'){
+ const offerPercentage=parseInt(data.offerPercentage)
+     const validity=new Date(data.validity)
+     const maxDiscount=parseInt(data.maxDiscount)
+     const minPurchase=parseInt(data.minPurchase)
+     await this.couponDb.create({
+      city: data.city ?? null,
+      code: data.code,
+      description: data.description,
+      validity,
+      offerPercentage,
+      maxDiscount,
+      minPurchase
+    });
 
+    return "Coupon added successfully";
+    }else{
+      return "Having trouble in adddnig coupon"
+    }
+    
+    
+    
+  } catch (error) {
+    throw new Error("Having trouble in adddnig coupon");
+  }
+}
 
+async fetchCoupon(pageNumber:number): Promise<Coupons[]|string>{
+  try {
+    const limit=8
+    const skip= (pageNumber-1)*limit
+    const result=await this.couponDb.find({validity:{$gte:new Date()}},{_id:0})
+    .sort({_id:-1})
+    .skip(skip)
+    .limit(limit)
+    if(result.length>0){
+      return result
+    }else{
+      return "No active coupons available"
+    }
+  } catch (error) {
+    throw new Error("Having trouble in fetching coupons")
+  }
+}
 }

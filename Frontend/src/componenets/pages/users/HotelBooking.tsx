@@ -4,17 +4,17 @@ import Header from './Header'
 import { useEffect, useState } from 'react'
 import { FaArrowLeft, FaArrowRight, FaRegEdit } from 'react-icons/fa'
 import DatePicker from 'react-datepicker'
-import { changeBookingDetail } from '../../../utils/axios/api'
+import { applyCouponRequest, changeBookingDetail } from '../../../utils/axios/api'
 import { useNavigate } from 'react-router-dom'
 import { resetStates, saveBookingDetails } from '../../../utils/redux/slices/userSlice'
-import { ratings } from '../../../utils/interfaces'
+import { dataForBookingHotel, ratings } from '../../../utils/interfaces'
 
 const HotelBooking = () => {
   const dispatch = useDispatch<AppDispatch>()
 
 
 
-  const {  hotelDetails, bookingDetails, lngLat, userInfo, message } = useSelector((state: RootState) => state.user)
+  const { hotelDetails, bookingDetails, lngLat, userInfo, message } = useSelector((state: RootState) => state.user)
 
   const navigate = useNavigate()
   // const availableRoomIndex = hotelDetails[0]?.roomCategories.findIndex((room) => room.isAvailable) || 0;
@@ -28,14 +28,15 @@ const HotelBooking = () => {
   }, [bookingDetails])
   console.log("numberOfDays", noOfDays)
   const [ratings, setRatings] = useState<ratings[]>(hotelDetails?.[0]?.ratings?.[0] ?? []);
-  useEffect(()=>{
+  useEffect(() => {
     setRatings(hotelDetails?.[0]?.ratings?.[0])
-  },[hotelDetails])
+  }, [hotelDetails])
 
   const [error, setError] = useState<string>("")
   const hotelId: string = hotelDetails[0]?.hotelId
   const initialRoomId = hotelDetails[0]?.roomCategories[0]?._id
   const [roomId, setRoomId] = useState<string | null>(initialRoomId || "")
+  const [couponCode, setCouponCode] = useState<string>('')
 
   useEffect(() => {
     if (message === "Hotels data found successfully") {
@@ -45,7 +46,7 @@ const HotelBooking = () => {
     console.log("roomCategoryIndex", roomCategoryIndex)
   }, [message])
 
-  
+
 
 
   const changeRoomType = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -64,7 +65,7 @@ const HotelBooking = () => {
     setRoomId(roomId)
   };
 
-  const [reviewCount,setReviewCount]=useState<number>(0)
+  const [reviewCount, setReviewCount] = useState<number>(0)
 
 
   const [popUpforDate, setPopUpforDate] = useState<boolean>(false)
@@ -72,6 +73,19 @@ const HotelBooking = () => {
   const [checkOut, setCheckOut] = useState<Date | null>(bookingDetails?.checkOut ?? null);
   const [guestNumber, setGuestNumber] = useState<number>(bookingDetails?.totalGuests ?? 1)
   const [numberOfRooms, setNumberOfRooms] = useState<number>(bookingDetails?.numberOfRooms ?? 1)
+  //discount 
+  const [discount, setDiscount] = useState<number>(0)
+  const [couponMessage, setCouponMessage] = useState<string>("")
+
+  useEffect(() => {
+    if (couponMessage === "coupon applied") {
+      const timer = setTimeout(() => {
+        setCouponMessage("")
+
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [couponMessage])
   useEffect(() => {
     if (bookingDetails?.numberOfRooms && bookingDetails?.totalGuests) {
       console.log("inside useFffect", bookingDetails?.totalGuests)
@@ -95,6 +109,7 @@ const HotelBooking = () => {
     setCheckOut(date);
 
   };
+  const totalPrice = hotelDetails[0]?.roomCategories[roomCategoryIndex].roomPrice * (bookingDetails ? bookingDetails?.numberOfRooms : 1) * noOfDays
 
 
   const getMaxDate = () => {
@@ -147,14 +162,14 @@ const HotelBooking = () => {
 
         }
       }
-    } else if(typeof checkOut==="string" && checkIn instanceof Date){
+    } else if (typeof checkOut === "string" && checkIn instanceof Date) {
       checkOutDate = new Date(checkOut)
 
       if (checkIn && checkOutDate && checkIn < checkOutDate) {
         console.log("inside if ")
         console.log("checkIn", checkIn)
 
-       
+
         console.log("checkOutDate", checkOutDate)
 
 
@@ -169,33 +184,46 @@ const HotelBooking = () => {
       if (checkIn && checkOutDate && roomId) {
         if (numberOfDays) {
           console.log("dispatching")
-          dispatch(changeBookingDetail({ lngLat, numberOfRooms, guestNumber, checkIn: checkIn, checkOut:checkOutDate, hotelId, roomId, noOfDays: numberOfDays }))
+          dispatch(changeBookingDetail({ lngLat, numberOfRooms, guestNumber, checkIn: checkIn, checkOut: checkOutDate, hotelId, roomId, noOfDays: numberOfDays }))
 
         }
       }
-    }else{
-     console.log("else is working")
+    } else {
+      console.log("else is working")
       if (checkIn && checkOut && roomId) {
-        console.log("type",typeof checkIn, typeof checkOut,"checkIn",checkIn,checkOut)
-       let  checkInDate=new Date(checkIn)
-       let  checkOutDate=new Date(checkOut)
+        console.log("type", typeof checkIn, typeof checkOut, "checkIn", checkIn, checkOut)
+        let checkInDate = new Date(checkIn)
+        let checkOutDate = new Date(checkOut)
 
         numberOfDays = Math.ceil(
           (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
         ) - 1;
         console.log("Number of Days:", numberOfDays);
         setNoOfDays(numberOfDays)
-       
-          console.log("dispatching")
-          dispatch(changeBookingDetail({ lngLat, numberOfRooms, guestNumber, checkIn: checkIn, checkOut, hotelId, roomId, noOfDays:numberOfDays}))
 
-        
+        console.log("dispatching")
+        dispatch(changeBookingDetail({ lngLat, numberOfRooms, guestNumber, checkIn: checkIn, checkOut, hotelId, roomId, noOfDays: numberOfDays }))
+
+
       }
     }
 
 
     setPopUpforDate(false)
 
+  }
+
+  //apply coupon
+  const applyCoupon = async (couponCode: string, totalPrice: number) => {
+    console.log("clicked")
+
+    const result = await applyCouponRequest(couponCode, totalPrice)
+    if (result.discount) {
+      setDiscount(result.discount)
+    }
+    if (result.message) {
+      setCouponMessage(result.message)
+    }
   }
 
 
@@ -206,7 +234,7 @@ const HotelBooking = () => {
         {/* <HotelSearchBar /> */}
 
       </div>
-      <div className="flex gap-8 p-8 mt-16" >
+      <div className="flex gap-8 p-8 mt-16 items-start" >
         {/* Left Section */}
         <div className="space-y-6 md:col-span-2">
           <h1 className="text-3xl font-bold">{hotelDetails[0]?.hotelName}</h1>
@@ -256,7 +284,7 @@ const HotelBooking = () => {
                       </div>
                       <span className="text-sm text-green-500 font-medium"></span>
                     </div>
-                    <p className="text-sm text-gray-500">Room size: {room.roomSize} sqft</p>
+                    <p className="text-sm text-gray-500">Room size: {room.roomSize} </p>
                     <div className="flex gap-2 text-sm mt-2">
                       {room.roomAmenities.map((amenity, index) => (
                         <span
@@ -276,69 +304,71 @@ const HotelBooking = () => {
 
           {/* Rating and Reviews Section */}
           <div className="space-y-6">
-            
 
-           {ratings.length>0 ? 
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Rating and Reviews</h2>
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl">
-                3.7
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span>5 ⭐</span>
-                  <span>38%</span>
-                </div>
-                <div className="w-1/2 bg-gray-300 h-2 rounded-md">
-                  <div
-                    className="bg-green-500 h-2 rounded-md"
-                    style={{ width: "38%" }}
-                  ></div>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span>4 ⭐</span>
-                  <span>21%</span>
-                </div>
-              </div>
 
-            </div>
- <div className='flex justify-center'>
- <FaArrowLeft className={`${reviewCount >0 ? 'text-black cursor-pointer' : 'text-white'} mt-4 mr-10` }  onClick={()=>setReviewCount((prev)=>{
-                    console.log("ratings",ratings)
-                    if(prev===0){
+            {ratings.length > 0 ?
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold">Rating and Reviews</h2>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl">
+                    3.7
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span>5 ⭐</span>
+                      <span>38%</span>
+                    </div>
+                    <div className="w-1/2 bg-gray-300 h-2 rounded-md">
+                      <div
+                        className="bg-green-500 h-2 rounded-md"
+                        style={{ width: "38%" }}
+                      ></div>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <span>4 ⭐</span>
+                      <span>21%</span>
+                    </div>
+                  </div>
+
+                </div>
+                <div className='flex justify-center'>
+                  <FaArrowLeft className={`${reviewCount > 0 ? 'text-black cursor-pointer' : 'text-white'} mt-4 mr-10`} onClick={() => setReviewCount((prev) => {
+                    console.log("ratings", ratings)
+                    if (prev === 0) {
                       console.log(prev)
                       return prev
                     }
- 
-                    return prev-1})}/>
-                  <img className='w-16 h-14 rounded-3xl' src={ratings[reviewCount].user.profileImage} alt='profileImage'/> 
+
+                    return prev - 1
+                  })} />
+                  <img className='w-16 h-14 rounded-3xl' src={ratings[reviewCount].user.profileImage} alt='profileImage' />
                   <div className='flex flex-col ml-8'>
                     <p className='text-lg font-bold'>{ratings[reviewCount].user.email}</p>
-                    <p className=''>{ratings[reviewCount].review}</p> 
+                    <p className=''>{ratings[reviewCount].review}</p>
                   </div>
-                  <p className= 'font-bold ml-10'>{ratings[reviewCount].rating} <span className='ml-2'>⭐</span></p>
-                 
-                  <FaArrowRight className={`ml-10 mt-3  ${reviewCount < ratings.length-1 ? 'text-black cursor-pointer' : 'text-white'}`} onClick={()=>setReviewCount((prev)=>{
-                    console.log("prec",prev)
-                    if(prev===ratings.length-1){
+                  <p className='font-bold ml-10'>{ratings[reviewCount].rating} <span className='ml-2'>⭐</span></p>
+
+                  <FaArrowRight className={`ml-10 mt-3  ${reviewCount < ratings.length - 1 ? 'text-black cursor-pointer' : 'text-white'}`} onClick={() => setReviewCount((prev) => {
+                    console.log("prec", prev)
+                    if (prev === ratings.length - 1) {
                       console.log(prev)
                       return prev
                     }
- 
-                    return prev+1})} />
-                
+
+                    return prev + 1
+                  })} />
+
                 </div>
-          </div> 
-          :<p className='text-slate-500'>No reviews yet</p>
-           }
-              
-                  
-                
-            
-    
-            
-          
+              </div>
+              : <p className='text-slate-500'>No reviews yet</p>
+            }
+
+
+
+
+
+
+
 
             {/* Hotel Policies */}
             <div className="space-y-2 mt-6">
@@ -358,12 +388,12 @@ const HotelBooking = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-96 border h-[28rem] border-gray-300 rounded-lg p-4 shadow-lg">
+        <div className="w-96 border  border-gray-300 rounded-lg p-4 shadow-lg">
           {/* Room availability check */}
           {hotelDetails[0]?.roomCategories[roomCategoryIndex] ? (
             <h2 className="text-xl font-bold">
               ₹{' '}
-              {hotelDetails[0]?.roomCategories[roomCategoryIndex].roomPrice *( bookingDetails ? bookingDetails?.numberOfRooms:1)*noOfDays}
+              {hotelDetails[0]?.roomCategories[roomCategoryIndex].roomPrice * (bookingDetails ? bookingDetails?.numberOfRooms : 1) * noOfDays}
             </h2>
           ) : (
             <p className="text-red-500">Rooms not available on these days</p>
@@ -489,7 +519,7 @@ const HotelBooking = () => {
               className="w-full border rounded px-2 py-1 mt-1"
               onChange={(e) => changeRoomType(e)}
             >
-              
+
               {hotelDetails[0].roomCategories.map((room, index) => (
                 <option key={index} value={room.roomType} data-room-id={room._id}>
                   {room.roomType}
@@ -526,10 +556,49 @@ const HotelBooking = () => {
                 <span>Number of days </span>
                 <span>{noOfDays}</span>
               </div>
+              <div className='flex flex-col px-2 justify-center mt-2 '>
+                <div className='flex border border-gray-900 px-4 py-1 gap-x-2'>
+                  <input type="text" name="" id="" placeholder='enter coupon code' className='w-3/4 focus:outline-none' value={couponCode}
+                    onChange={(e) => {
+                      const upperCaseValue = e.target.value.toUpperCase();
+                      setCouponCode(upperCaseValue)
+                      setCouponMessage("")
+                      setDiscount(0)
+                    }} />
+                  {discount > 0 ? <button className='text-red-500'
+                    onClick={() => {
+                      setCouponCode("")
+                      setDiscount(0)
+                    }}>
+                    remove
+                  </button>
+                    : <button className='text-blue-700'
+                      onClick={() => applyCoupon(couponCode, totalPrice)}>
+                      Apply
+                    </button>}
+                </div>
+                {couponMessage !== "coupon applied" && couponMessage && couponMessage.length > 0 && <p className='text-red-600'>{couponMessage}</p>}
+                {couponMessage === "coupon applied" && (<p className='text-green-600'>{couponMessage}</p>)}
+              </div>
+
+              {discount > 0 && (
+                <div>
+                  <div className="flex justify-between mt-4 font-normal">
+                    <span>Room price</span>
+                    <span>{totalPrice}</span>
+                  </div>
+                  <div className="flex justify-between mt-4 font-normal">
+                    <span>Discount:</span>
+                    <span>-{discount}</span>
+                  </div>
+                </div>
+
+              )}
               <div className="flex justify-between mt-4 font-semibold">
                 <span>Total Price:</span>
-                <span>₹ {hotelDetails[0]?.roomCategories[roomCategoryIndex].roomPrice * (bookingDetails ? bookingDetails?.numberOfRooms : 1) * noOfDays}</span>
+                <span>₹ {discount ? totalPrice - discount : totalPrice}</span>
               </div>
+
 
               <button className="mt-4 bg-blue-600 text-white w-full py-2 rounded"
                 onClick={(e) => {
@@ -542,7 +611,9 @@ const HotelBooking = () => {
                       noOfDays,
                       roomId: room._id,
                       hotelId: hotelDetails[0].hotelId,
-                      totalAmount: room.roomPrice * (bookingDetails ? bookingDetails?.numberOfRooms : 1)*noOfDays,
+                      totalRoomPrice: room.roomPrice * (bookingDetails ? bookingDetails?.numberOfRooms : 1) * noOfDays,
+                      discount: discount ? discount : 0,
+                      totalAmount: discount ? (room.roomPrice * (bookingDetails ? bookingDetails?.numberOfRooms : 1) * noOfDays) - discount : room.roomPrice * (bookingDetails ? bookingDetails?.numberOfRooms : 1) * noOfDays,
                       hotelName: hotelDetails[0].hotelName,
                       hotelAddress: hotelDetails[0].address,
                       userId: userInfo?.userId

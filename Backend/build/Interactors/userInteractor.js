@@ -200,5 +200,64 @@ class userInteractor {
             throw error;
         }
     }
+    //    async notificationCountUpdater(id: string): Promise<{ count: number }> {
+    //     try {
+    //       const response = await this.repository.notificationCountUpdater(id);
+    //       return response;
+    //     } catch (error: any) {
+    //       throw new customError(error.message, error.statusCode);
+    //     }
+    //   }
+    //   async notificationsGetter(
+    //     id: string
+    //   ): Promise<{ notfiyData: INotifyGetterResponse[] | [] }> {
+    //     try {
+    //       const response = await this.repository.notificationsGetter(id);
+    //       if (
+    //         response.countOfUnreadMessages.length > 0 &&
+    //         response.notfiyData.length > 0
+    //       ) {
+    //         const data: INotifyGetterResponse[] = response.notfiyData.map(
+    //           (data) => {
+    //             const matchedItem = response.countOfUnreadMessages.find(
+    //               (item) => item._id + "" === data._id + ""
+    //             );
+    //             return { ...data, count: matchedItem ? matchedItem.count : 1 };
+    //           }
+    //         );
+    //         return { notfiyData: data };
+    //       }
+    //       return { notfiyData: [] };
+    //     } catch (error: any) {
+    //       throw new customError(error.message, error.statusCode);
+    //     }
+    //   }
+    async getTopRatedHotels(latLng) {
+        try {
+            const response = await this.repository.fetchTopRatedHotels(latLng);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async getCoupon(city) {
+        try {
+            const response = await this.repository.fetchCoupons(city);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async checkCoupon(code, purchaseAmount) {
+        try {
+            const response = await this.repository.applyCoupon(code, purchaseAmount);
+            return response;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
 }
 exports.userInteractor = userInteractor;

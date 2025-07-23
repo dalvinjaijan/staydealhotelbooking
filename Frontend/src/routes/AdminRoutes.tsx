@@ -12,6 +12,7 @@ import UserManagement from '../componenets/pages/admin/UserManagement'
 import EditHotelRequests from '../componenets/pages/admin/EditHotelRequest'
 import Wallet from '../componenets/pages/admin/Wallet'
 import Complaints from '../componenets/pages/admin/Complaints'
+import DiscountCoupons from '../componenets/pages/admin/DiscountCoupons'
 
 
 const AdminRoutes = () => {
@@ -29,6 +30,7 @@ const AdminRoutes = () => {
       <Route path='/hotelEditRequest' element={<EditHotelRequests />} />
       <Route path='/wallet' element={<Wallet />} />
       <Route path='/complaints' element={<Complaints/>} />
+      <Route path='/coupons' element={<DiscountCoupons/>} />
 
       
 

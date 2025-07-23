@@ -320,6 +320,33 @@ class userController {
             next(error);
         }
     }
+    async fetchCoupon(req, res, next) {
+        try {
+            const { city } = req.query;
+            console.log("city", city);
+            if (typeof city !== "string")
+                throw new Error("Invalid city");
+            const response = await this.interactor.getCoupon(city);
+            res.status(200).json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async applyCoupon(req, res, next) {
+        try {
+            const { code, purchaseAmount } = req.body;
+            console.log("code and amount", code, purchaseAmount);
+            if (typeof code !== "string")
+                throw new Error("Invalid city");
+            const response = await this.interactor.checkCoupon(code, purchaseAmount);
+            res.status(200).json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    //chat
     async getChatOfOneToOne(req, res, next) {
         try {
             const { chatId, whoWantsData } = req.params;
@@ -358,6 +385,42 @@ class userController {
             console.log("hostId, userId in controller", hostId, userId);
             const response = await this.chatInteractor.getChatid(hostId, userId);
             return res.status(200).json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    // async notificationCountUpdater(
+    //   req: Request,
+    //   res: Response,
+    //   next: NextFunction
+    // ) {
+    //   try {
+    //     const { id } = req.params;
+    //     const response = await this.interactor.notificationCountUpdater(id);
+    //     return res.status(HttpStatus.OK).json(response);
+    //   } catch (error) {
+    //     next(error);
+    //   }
+    // }
+    // async notificationGetter(req: Request, res: Response, next: NextFunction) {
+    //   try {
+    //     const { id } = req.params;
+    //     const response = await this.interactor.notificationsGetter(id);
+    //     return res.status(HttpStatus.OK).json(response);
+    //   } catch (error) {
+    //     next(error);
+    //   }
+    // }
+    async fetchTopRatedHotels(req, res, next) {
+        try {
+            const { lngLat } = req.query;
+            console.log("lng", lngLat);
+            if (typeof lngLat === "string") {
+                const parsedLatLng = JSON.parse(lngLat);
+                const response = await this.interactor.getTopRatedHotels(parsedLatLng);
+                return res.status(statusCodes_1.default.OK).json(response);
+            }
         }
         catch (error) {
             next(error);

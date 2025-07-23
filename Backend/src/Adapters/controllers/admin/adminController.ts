@@ -110,8 +110,10 @@ res.status(200).json({message:"hotel fetched successfully",response})
 }
 async fetchUsers(req:Request,res:Response,next:NextFunction){
   try {
+    const {page}=req.query
+    const pageNumber=page? parseInt(page as string, 10):1
     console.log("fetch users")
- const response=await this.interactor.getUsers()
+ const response=await this.interactor.getUsers(pageNumber)
  
 
 res.status(200).json({message:"users fetched successfully",response})
@@ -228,8 +230,31 @@ async walletDetails(req:Request,res:Response,next:NextFunction){
       next(error)
     }
   }
+  async addCoupon(req:Request,res:Response,next:NextFunction){
+    try{ 
+      const data=req.body
+      console.log(data)
+        const response=await this.interactor.addCoupons(data)
+        res.json(response)
+    
+      
+    } catch (error) {
+      next(error)
+    }
+  }
 
-  
+    async fetchCoupon(req:Request,res:Response,next:NextFunction){
+    try{ 
+      const {page}=req.query
+      const pageNumber = page ? parseInt(page as string, 10) : 1;
+        const response=await this.interactor.fetchCoupons(pageNumber)
+        res.json(response)
+    
+      
+    } catch (error) {
+      next(error)
+    }
+  }
 
 
 

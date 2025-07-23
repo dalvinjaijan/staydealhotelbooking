@@ -34,6 +34,9 @@ userRouter.patch('/cancelBooking', (0, verifyToken_1.verifyAccessToken)('user'),
 userRouter.get('/wallet-transactions', (0, verifyToken_1.verifyAccessToken)('user'), (0, verifyToken_1.verifyRole)(['user']), controller.viewWalletTransactions.bind(controller));
 userRouter.post('/rating', (0, verifyToken_1.verifyAccessToken)('user'), (0, verifyToken_1.verifyRole)(['user']), controller.ratingAndReview.bind(controller));
 userRouter.post('/reportHotel', (0, verifyToken_1.verifyAccessToken)('user'), (0, verifyToken_1.verifyRole)(['user']), controller.reportHotel.bind(controller));
+userRouter.get('/coupons', controller.fetchCoupon.bind(controller));
+userRouter.post('/applyCoupon', controller.applyCoupon.bind(controller));
+userRouter.get('/topRatedProperties', controller.fetchTopRatedHotels.bind(controller));
 userRouter.get("/getChatId/:hostId/:userId", controller.getChatId.bind(controller));
 userRouter.get("/getchatofOneToOne/:chatId/:whoWantsData", controller.getChatOfOneToOne.bind(controller));
 userRouter.get("/getchat/:whom/:id", controller.fetchChat.bind(controller));

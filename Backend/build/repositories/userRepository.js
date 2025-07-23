@@ -15,6 +15,8 @@ const invoiceEmail_1 = require("../Utils/invoiceEmail");
 const adminSchema_1 = __importDefault(require("../db/models/adminSchema"));
 const ratingSchema_1 = __importDefault(require("../db/models/ratingSchema"));
 const reportSchema_1 = __importDefault(require("../db/models/reportSchema"));
+const errorHandling_1 = require("../Adapters/middlewares/errorHandling");
+const CouponSchema_1 = __importDefault(require("../db/models/CouponSchema"));
 class userRepository {
     userDB;
     hostDb;
@@ -25,6 +27,7 @@ class userRepository {
     adminDb;
     ratingDb;
     reportDb;
+    couponDb;
     constructor() {
         this.userDB = userSchema_1.default;
         this.hostDb = hostSchema_1.default;
@@ -35,6 +38,7 @@ class userRepository {
         this.adminDb = adminSchema_1.default;
         this.ratingDb = ratingSchema_1.default;
         this.reportDb = reportSchema_1.default;
+        this.couponDb = CouponSchema_1.default;
     }
     async findUserByEmail(email) {
         const userExists = await this.userDB.findOne({ email: email });
@@ -781,9 +785,14 @@ class userRepository {
             }
             // Save the updated room category
             await roomCategory.save();
+            function randomBookingId() {
+                const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+                const randomPart = Math.floor(100000 + Math.random() * 900000);
+                return "SD" + datePart + randomPart;
+            }
             // Assuming you have a Booking model and a Hotel model
             const booking = new bookingSchema_1.default({
-                bookingId: new mongoose_1.default.Types.ObjectId().toString(),
+                bookingId: randomBookingId(),
                 userId: bookingDetails.userId,
                 checkIn: bookingDetails.checkIn,
                 checkOut: bookingDetails.checkOut,
@@ -794,6 +803,8 @@ class userRepository {
                 noOfGuests: bookingDetails.guestNumber,
                 noOfRooms: bookingDetails.numberOfRooms,
                 roomNumbers: reservedRoomNumbers,
+                totalRoomPrice: bookingDetails.totalRoomPrice,
+                discount: bookingDetails.discount,
                 totalAmount: bookingDetails.totalAmount,
                 GuestDetails: {
                     name: bookingDetails.name,
@@ -1128,6 +1139,178 @@ class userRepository {
         }
         catch (error) {
             throw new Error("Error saving rating:");
+        }
+    }
+    // async notificationCountUpdater(id: string): Promise<{ count: number }> {
+    //     try {
+    //         const message = await messageModel.aggregate([
+    //             { $match: { $and: [{ sender: "host" }, { seen: false }] } },
+    //             {
+    //                 $lookup: {
+    //                     from: "chats",
+    //                     localField: "chatId",
+    //                     foreignField: "_id",
+    //                     as: "chat"
+    //                 }
+    //             },
+    //             { $match: { "chat.userId": new mongoose.Types.ObjectId(id) } }
+    //         ]);
+    //         return { count: message.length };
+    //     } catch (error: any) {
+    //         throw new customError(error.message, error.statusCode);
+    //     }
+    // }
+    // async notificationsGetter(id: string): Promise<{
+    //     notfiyData: NotifyGetterResponse[] | [];
+    //     countOfUnreadMessages: UnreadMessageCount[] | [];
+    // }> {
+    //     try {
+    //         const querynotifyData = [
+    //             { $match: { userId: new mongoose.Types.ObjectId(id) } },
+    //             {
+    //                 $lookup: {
+    //                     from: "messages",
+    //                     localField: "latestMessage",
+    //                     foreignField: "_id",
+    //                     as: "message",
+    //                 },
+    //             },
+    //             { $unwind: "$message" },
+    //             { $match: { "message.sender": "host" } },
+    //             {
+    //                 $lookup: {
+    //                     from: "hosts",
+    //                     localField: "hostId",
+    //                     foreignField: "_id",
+    //                     as: "host",
+    //                 },
+    //             },
+    //             { $unwind: "$host" },
+    //             {
+    //                 $project: {
+    //                     hostId: 1,
+    //                     userId: 1,
+    //                     createdAt: 1,
+    //                     updatedAt: 1,
+    //                     latestMessage: 1,
+    //                     message: 1,
+    //                     "host.firstName": 1,
+    //                     "host.profileImage": 1,
+    //                 },
+    //             },
+    //         ];
+    //         const querycountOfUnreadMessages = [
+    //             {
+    //                 $lookup: {
+    //                     from: "chats",
+    //                     localField: "chatId",
+    //                     foreignField: "_id",
+    //                     as: "chat",
+    //                 },
+    //             },
+    //             { $unwind: "$chat" },
+    //             {
+    //                 $match: {
+    //                     $and: [
+    //                         { "chat.userId": new mongoose.Types.ObjectId(id) },
+    //                         { sender: "host" },
+    //                         { seen: false },
+    //                     ],
+    //                 },
+    //             },
+    //             { $group: { _id: "$chatId", count: { $sum: 1 } } },
+    //         ];
+    //         const notifyData: NotifyGetterResponse[] | [] =
+    //             await chatModel.aggregate(querynotifyData);
+    //         const countOfUnreadMessages: UnreadMessageCount[] | [] =
+    //             await messageModel.aggregate(querycountOfUnreadMessages);
+    //         return {
+    //             notfiyData: notifyData,
+    //             countOfUnreadMessages: countOfUnreadMessages,
+    //         };
+    //     } catch (error: any) {
+    //         throw new customError(error.message, error.statusCode);
+    //     }
+    // }
+    async fetchTopRatedHotels(latLng) {
+        try {
+            const { lat, lng } = latLng;
+            const earthRadiusInMiles = 3963.2; // Radius of Earth in miles
+            const maxDistanceInMiles = 50; // Search radius
+            const hotels = await this.hotelDb.aggregate([
+                {
+                    $match: {
+                        isHotelListed: "approved", // Only approved hotels
+                        location: {
+                            $geoWithin: {
+                                $centerSphere: [[lng, lat], maxDistanceInMiles / earthRadiusInMiles]
+                            }
+                        }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "ratings",
+                        localField: "_id",
+                        foreignField: "hotelId",
+                        as: "ratings"
+                    }
+                },
+                { $addFields: { averageRatings: { $avg: "$ratings.rating" } }
+                },
+                { $sort: {
+                        averageRatings: -1
+                    } },
+                { $project: {
+                        _id: 1,
+                        hotelName: 1,
+                        address: 1,
+                        hotelPhoto: { $arrayElemAt: ["$hotelPhoto", 0] },
+                        averageRatings: 1
+                    } }
+            ]);
+            return hotels;
+        }
+        catch (error) {
+            throw new Error("Could not fetch top-rated hotels");
+        }
+    }
+    async fetchCoupons(city) {
+        try {
+            const today = new Date();
+            const coupons = this.couponDb.find({ $or: [{ city }, { city: null }], validity: { $gte: today } })
+                .sort({ _id: -1 });
+            console.log("coupons", coupons);
+            return coupons;
+        }
+        catch (error) {
+            throw new Error("Having issue in fetching coupons");
+        }
+    }
+    async applyCoupon(code, purchaseAmount) {
+        try {
+            const today = new Date();
+            const response = await this.couponDb.find({ code: code, validity: { $gte: today } }, { offerPercentage: 1, minPurchase: 1, maxDiscount: 1 });
+            if (response.length === 0) {
+                return { message: "Invalid code" };
+            }
+            else {
+                const coupon = response[0];
+                const isTaken = await this.userDB.findOne({ coupons: coupon._id });
+                if (isTaken) {
+                    return { message: "coupon has already used" };
+                }
+                if (purchaseAmount < coupon.minPurchase) {
+                    return { message: `should book hotel for atleast ${coupon.minPurchase} to apply this  coupon` };
+                }
+                else {
+                    const discount = Math.min(coupon.maxDiscount, purchaseAmount * (coupon.offerPercentage / 100));
+                    return { message: 'coupon applied', discount };
+                }
+            }
+        }
+        catch (error) {
+            throw new errorHandling_1.customError(error.message, error.statusCode);
         }
     }
 }

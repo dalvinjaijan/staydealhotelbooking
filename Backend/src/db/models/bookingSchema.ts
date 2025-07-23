@@ -15,6 +15,8 @@ const bookingSchema= new mongoose.Schema({
     noOfRooms:{type:Number},
     roomNumbers:{type:[String],default:[]},
     totalAmount:{type:Number},
+    totalRoomPrice:{type:Number},
+    discount:{type:Number,default:0},
 
     GuestDetails:{
     name:{type:String},

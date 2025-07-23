@@ -41,6 +41,9 @@ const userSchema = new mongoose_1.default.Schema({
     },
     walletTransaction: {
         type: [walletTransactionType]
+    },
+    coupons: {
+        type: [mongoose_1.default.Schema.Types.ObjectId], ref: "Coupon", default: []
     }
 });
 const User = mongoose_1.default.model("User", userSchema);

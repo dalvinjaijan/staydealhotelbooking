@@ -165,7 +165,7 @@ const Header = () => {
             <ul className='cursor-pointer'
             onClick={()=>navigate('/')}>Home</ul>
             <ul className='cursor-pointer'
-            onClick={()=>navigate('/host/home')}
+           onClick={() => window.open('/host/home', '_blank')}
             >List your properties</ul>
             {/* <ul>Contact us</ul> */}
             <ul className='cursor-pointer' 

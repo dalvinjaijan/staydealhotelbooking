@@ -17,6 +17,7 @@ import PlacesContextFunction from './context/placesContext.tsx'
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from '@stripe/react-stripe-js'
 import { SocketProvider } from './context/socketio.tsx'
+import ScrollToTop from './componenets/pages/commonComponents/ScrollToTop.tsx'
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 interface ErrorBoundaryProps {
@@ -61,13 +62,16 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <PersistGate loading={null} persistor={persistor}>
       <ErrorBoundary>
         <BrowserRouter>
-        <Elements stripe={stripePromise}>
+        <ScrollToTop />
+<Elements stripe={stripePromise}>
             <ToastContainer pauseOnHover={false} position="bottom-right"/>
             <SocketProvider>
             <App />
 
             </SocketProvider>
                 </Elements>
+        
+        
         </BrowserRouter>
       </ErrorBoundary>
     </PersistGate>

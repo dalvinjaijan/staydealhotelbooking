@@ -82,9 +82,9 @@ class adminInteractor {
         catch (error) {
         }
     }
-    async getUsers() {
+    async getUsers(pageNumber) {
         try {
-            const response = await this.repository.fetchUsers();
+            const response = await this.repository.fetchUsers(pageNumber);
             return response;
         }
         catch (error) {
@@ -171,6 +171,24 @@ class adminInteractor {
         }
         catch (error) {
             throw new Error("Error fetching report");
+        }
+    }
+    async addCoupons(data) {
+        try {
+            const response = await this.repository.addCoupon(data);
+            return response;
+        }
+        catch (error) {
+            throw new Error("Error adding coupons");
+        }
+    }
+    async fetchCoupons(pageNumber) {
+        try {
+            const response = await this.repository.fetchCoupon(pageNumber);
+            return response;
+        }
+        catch (error) {
+            throw new Error("Error adding coupons");
         }
     }
 }

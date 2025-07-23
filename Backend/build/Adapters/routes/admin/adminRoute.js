@@ -29,4 +29,7 @@ adminRouter.get('/walletDetails', (0, verifyToken_1.verifyAccessToken)('admin'),
 //dashboard
 adminRouter.get('/fetchReport', (0, verifyToken_1.verifyAccessToken)('admin'), (0, verifyToken_1.verifyRole)(['admin']), controller.fetchReport.bind(controller));
 adminRouter.get('/fetchComplaints', (0, verifyToken_1.verifyAccessToken)('admin'), (0, verifyToken_1.verifyRole)(['admin']), controller.fetchComplaints.bind(controller));
+//coupon
+adminRouter.post('/addCoupons', (0, verifyToken_1.verifyAccessToken)('admin'), (0, verifyToken_1.verifyRole)(['admin']), controller.addCoupon.bind(controller));
+adminRouter.get('/fetchCoupons', (0, verifyToken_1.verifyAccessToken)('admin'), (0, verifyToken_1.verifyRole)(['admin']), controller.fetchCoupon.bind(controller));
 exports.default = adminRouter;

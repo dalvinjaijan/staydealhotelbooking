@@ -1,4 +1,4 @@
-import { adminInteractorInterface, adminLoginSuccessResponse } from "../Adapters/interfaces/adminInterface/iAdminInteractor"
+import { adminInteractorInterface, adminLoginSuccessResponse, Coupons } from "../Adapters/interfaces/adminInterface/iAdminInteractor"
 import { adminRepositoryInterface } from "../Adapters/interfaces/adminInterface/iAdminRepository"
 import { customError } from "../Adapters/middlewares/errorHandling"
 import bcrypt from 'bcryptjs'
@@ -90,9 +90,9 @@ export class adminInteractor implements adminInteractorInterface{
     }
  }
 
- async getUsers(): Promise<any> {
+ async getUsers(pageNumber:number): Promise<any> {
   try {
-    const response=await this.repository.fetchUsers()
+    const response=await this.repository.fetchUsers(pageNumber)
     return response
   } catch (error) {
     
@@ -190,6 +190,30 @@ async fetchComplaint(): Promise<any> {
 
   }
 }
+
+async addCoupons(data:Coupons): Promise<string> {
+  try {
+    
+        const response=await this.repository.addCoupon(data)
+        return response
+    
+  } catch (error) {
+    throw new Error("Error adding coupons");
+
+  }
+}
+async fetchCoupons(pageNumber:number): Promise<Coupons[]|string> {
+  try {
+    
+        const response=await this.repository.fetchCoupon(pageNumber)
+        return response
+    
+  } catch (error) {
+    throw new Error("Error adding coupons");
+
+  }
+}
+
 
 
 }

@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { adminApi } from "../axiosconfig";
+import { Coupon } from "../../interfaces";
 
 const login=createAsyncThunk(
     'admin/login',
@@ -101,11 +102,11 @@ const getRejectedHotels=createAsyncThunk(
 
 const fetchUsers=createAsyncThunk(
   'admin/fetchUsers',
-  async (_,{rejectWithValue})=>{
+  async (page:number,{rejectWithValue})=>{
       try{
         console.log("inside thunk of fetchUsers");
         
-      const response=await adminApi.get('/fetchUsers')
+      const response=await adminApi.get(`/fetchUsers?page=${page}`)
       console.log(response.data)
       return response.data
     } catch (err:any) {
@@ -188,7 +189,25 @@ const approveEditHotelRequest=createAsyncThunk(
   }
 )
 
+const addCoupons=async (data:Coupon)=>{
+  try {
+    const response=await adminApi.post('/addCoupons',data)
+      console.log(response.data)
+    return response.data
+  } catch (error:any) {
+    throw new Error(error)
+  }
+}
 
+const fetchCoupons=async (page:number=1)=>{
+  try {
+    const response=await adminApi.get(`/fetchCoupons?page=${page}`)
+    console.log(response.data)
+    return response.data
+  } catch (error) {
+    
+  }
+}
 
 
 
@@ -207,5 +226,7 @@ export{
     unBlockUser,
     getEditedHotelsRequest,
     rejectHotelEditRequest,
-    approveEditHotelRequest
+    approveEditHotelRequest,
+    addCoupons,
+    fetchCoupons
 }

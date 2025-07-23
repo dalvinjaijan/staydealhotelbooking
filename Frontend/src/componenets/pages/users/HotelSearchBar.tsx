@@ -13,6 +13,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import './style.css'
 import { IoSearch } from "react-icons/io5";
+import { FaXmark } from 'react-icons/fa6'
 
 const HotelSearchBar = () => {
   const dispatch: AppDispatch = useDispatch<AppDispatch>()
@@ -29,6 +30,11 @@ const HotelSearchBar = () => {
   
 
   const [error, setError] = useState("");
+  useEffect(()=>{
+    if(error){
+      toast.error(error)
+    }
+  },[error])
 
   //validation
   const validateInputs = () => {
@@ -117,9 +123,7 @@ const HotelSearchBar = () => {
 
   
 if( checkIn && checkIn!==today){
-  console.log("today",today)
   minDatePlusOne.setDate(checkIn.getDate()+1)
-  console.log("minDatePlusOne",minDatePlusOne)
 
 }else
  minDatePlusOne.setDate(minDatePlusOne.getDate() + 1)
@@ -315,44 +319,69 @@ if( checkIn && checkIn!==today){
           }} className="text-2xl" />
           {/* <span className="material-icons">search</span> */}
         </button>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
 
       {
         popupForRoom &&
-        <div className="absolute flex flex-col right-20 z-20 w-48 bg-white border border-gray-300 rounded shadow-lg" onClick={(e) => e.stopPropagation()}>
-          <div className='w-full'>
-            <button
-              className="absolute top-2 right-2  text-gray-500 hover:text-gray-700 transition"
-              onClick={() => setPopupForRoom(false)} // Add a function to close the popup
-            >
-              &times;
-            </button>
-          </div>
+      <div
+  className="absolute flex flex-col right-64 mt-1 z-20 w-48 bg-white border border-gray-300 rounded shadow-lg"
+  onClick={(e) => e.stopPropagation()}
+>
+  {/* Container for close button */}
+  <div className="relative h-4">
+    <button
+      className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 transition"
+      onClick={() => setPopupForRoom(false)}
+    >
+      <FaXmark />
+    </button>
+  </div>
 
-          <div className='flex border-b px-4 py-2 justify-between font-bold text-stone-800 text-sm'>
-            <h1>Rooms</h1>
-            <h1>Guests</h1>
-          </div>
+  <div className='flex border-b px-4 py-2 justify-between font-bold text-stone-800 text-sm'>
+    <h1>Rooms</h1>
+    <h1>Guests</h1>
+  </div>
 
-          <div className='flex flex-col gap-2'>
-            {Array.from({ length: numberOfRooms }).map((_, index) => (
-              <div key={index} className='flex justify-between py-3 px-4 border-b text-sm'>
-                <div><h1>Room {index + 1}</h1></div>
-                <div className='flex gap-3'>
-                  <button className={guestNumber[index] <= 1 ? 'text-gray-400 border px-2 ' : 'text-black border px-2'} disabled={guestNumber[index] <= 1} onClick={() => decrementGuest(index)}>-</button>
-                  <h1>{guestNumber[index]}</h1>
-                  <button className={guestNumber[index] >= 3 ? 'text-gray-400 border px-2 ' : 'text-black border px-2'} disabled={guestNumber[index] >= 3} onClick={() => incrementGuest(index)}>+</button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className='px-2 py-3 flex text-xs justify-between'>
-            <button className={numberOfRooms >= 6 ? 'text-gray-400 ' : 'text-black '} disabled={numberOfRooms >= 6} onClick={addRoom}>Add Room</button>
-
-            <button className={numberOfRooms <= 1 ? 'text-gray-400 ' : 'text-black'} disabled={numberOfRooms <= 1} onClick={deleteRoom}>Remove Room</button>
-          </div>
+  <div className='flex flex-col gap-2'>
+    {Array.from({ length: numberOfRooms }).map((_, index) => (
+      <div key={index} className='flex justify-between py-3 px-4 border-b text-sm'>
+        <div><h1>Room {index + 1}</h1></div>
+        <div className='flex gap-3'>
+          <button
+            className={guestNumber[index] <= 1 ? 'text-gray-400 border px-2 ' : 'text-black border px-2'}
+            disabled={guestNumber[index] <= 1}
+            onClick={() => decrementGuest(index)}
+          >-</button>
+          <h1>{guestNumber[index]}</h1>
+          <button
+            className={guestNumber[index] >= 3 ? 'text-gray-400 border px-2 ' : 'text-black border px-2'}
+            disabled={guestNumber[index] >= 3}
+            onClick={() => incrementGuest(index)}
+          >+</button>
         </div>
+      </div>
+    ))}
+  </div>
+
+  <div className='px-2 py-3 flex text-xs justify-between'>
+    <button
+      className={numberOfRooms >= 6 ? 'text-gray-400 ' : 'text-black '}
+      disabled={numberOfRooms >= 6}
+      onClick={addRoom}
+    >
+      Add Room
+    </button>
+
+    <button
+      className={numberOfRooms <= 1 ? 'text-gray-400 ' : 'text-black'}
+      disabled={numberOfRooms <= 1}
+      onClick={deleteRoom}
+    >
+      Remove Room
+    </button>
+  </div>
+</div>
+
       }
     </div>
 

@@ -147,6 +147,8 @@ export interface dataForBookingHotel{
     hotelName:string,
     hotelAddress:string,
     roomPrice:number,
+    totalRoomPrice:number,
+    discount:number,
     totalAmount:number,
     roomType:string,
     name:string,
@@ -286,4 +288,34 @@ export interface IChatingUser {
       lastName:string;
       profileImage:string
     }
+  }
+
+  export interface topRatedProps{
+    hotelName:string;
+    address:string
+    hotelPhoto:string,
+    averageRatings:number|null
+  }
+  export interface latLng{
+    
+        lat:number,
+        lng:number
+    
+  }
+  export interface Coupon{
+    city:string|null,
+    code:string,
+    description:string,
+    validity:string|Date,
+    offerPercentage:string|number,
+    maxDiscount:string|number,
+    minPurchase:string|number
+  }
+  
+  export interface CouponsData{
+    city:string|null,
+    code:string,
+    description:string,
+    validity:string|Date,
+
   }

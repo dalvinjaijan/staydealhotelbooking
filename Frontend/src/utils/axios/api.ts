@@ -1,6 +1,7 @@
 import { createAsyncThunk, } from "@reduxjs/toolkit";
 import {api} from "./axiosconfig";
-import { dataForBookingHotel, userDetails } from "../interfaces";
+import { dataForBookingHotel, latLng, userDetails } from "../interfaces";
+import axios from "axios";
 
 const sendOtp=createAsyncThunk(
     'login/sendOtp',
@@ -178,7 +179,51 @@ const bookRoom=createAsyncThunk(
   }
 )
 
+const fetchTopRatedHotels=async (lngLat:latLng)=>{
+  try {
+    const response=await api.get(`/topRatedProperties?lngLat=${encodeURIComponent(JSON.stringify(lngLat))}`)
+    return response.data
+  } catch (error:any) {
+    throw new Error(error)
+  }
+}
 
+const fetchCoupons=async (city:string)=>{
+  try {
+    const response=await api.get(`/coupons?city=${city}`)
+    console.log("data",response.data)
+    return response.data
+  } catch (error:any) {
+    throw new Error(error)
+  }
+}
+
+const applyCouponRequest=async (code:string,purchaseAmount:number)=>{
+  try {
+    const response=await api.post('/applyCoupon',{code,purchaseAmount})
+    console.log("data",response.data)
+    return response.data
+  } catch (error:any) {
+    throw new Error(error)
+  }
+}
+
+const stripeRequest=async(amount:number,roomType:string)=>{
+  try {
+    const response=await axios.post("http://localhost:3001/create-checkout-session", {
+            amount: amount,
+            currency: "inr",
+            description: `Booking for ${roomType}`,
+          },
+        {
+          withCredentials:true
+        });
+        return response
+  } catch (error:any) {
+    throw new Error(error)
+    
+  }
+}
 
 export{
     sendOtp,
@@ -191,5 +236,9 @@ export{
     fetchFilteredHotels,
     searchHotelforBooking,
     changeBookingDetail,
-    bookRoom
+    bookRoom,
+    fetchTopRatedHotels,
+    fetchCoupons,
+    applyCouponRequest,
+    stripeRequest
 }

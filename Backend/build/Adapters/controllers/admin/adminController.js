@@ -91,8 +91,10 @@ class adminController {
     }
     async fetchUsers(req, res, next) {
         try {
+            const { page } = req.query;
+            const pageNumber = page ? parseInt(page, 10) : 1;
             console.log("fetch users");
-            const response = await this.interactor.getUsers();
+            const response = await this.interactor.getUsers(pageNumber);
             res.status(200).json({ message: "users fetched successfully", response });
         }
         catch (error) {
@@ -181,6 +183,28 @@ class adminController {
     async fetchComplaints(req, res, next) {
         try {
             const response = await this.interactor.fetchComplaint();
+            res.json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async addCoupon(req, res, next) {
+        try {
+            const data = req.body;
+            console.log(data);
+            const response = await this.interactor.addCoupons(data);
+            res.json(response);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async fetchCoupon(req, res, next) {
+        try {
+            const { page } = req.query;
+            const pageNumber = page ? parseInt(page, 10) : 1;
+            const response = await this.interactor.fetchCoupons(pageNumber);
             res.json(response);
         }
         catch (error) {

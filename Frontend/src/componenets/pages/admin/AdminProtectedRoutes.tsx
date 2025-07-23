@@ -9,15 +9,16 @@ interface PrivateRouteProps {
 
 const AdminProtectedRoutes:React.FC<PrivateRouteProps> = ({role}) => {
     const navigate=useNavigate()
+    const {adminInfo} = useSelector((state:RootState)=>state.admin)
+
     useEffect(()=>{
         if(!adminInfo?.accessToken){
             navigate('/admin/login')
         }else if(adminInfo.role!==role){
             navigate('/admin/login')
         }
-    })
+    },[adminInfo])
 
-    const {adminInfo} = useSelector((state:RootState)=>state.admin)
     console.log("adminInfo from AdminProtectedRoutes--"+ adminInfo?.accessToken )
     // console.log("Children"+JSON.stringify(JSON.parse({children})))
     return (adminInfo?.accessToken && adminInfo.role==="admin")? (<div><Outlet/></div>):<div>NO ACCESS TOKEN</div>

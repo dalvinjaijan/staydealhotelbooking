@@ -8,7 +8,7 @@ export interface adminInteractorInterface{
     getApprovedHotel():Promise<any>
     blockhotel(hotelId:string):Promise<any>
     getRejectedHotel():Promise<any>
-    getUsers():Promise<any>
+    getUsers(pageNumber:number):Promise<any>
     blockuser(userId:string):Promise<any>
     unBlockuser(userId:string):Promise<any>
     getEditedHotelRequests():Promise<any>
@@ -17,6 +17,8 @@ export interface adminInteractorInterface{
     getWalletDetails():Promise<any>
     fetchReportLogic(period:string):Promise<any>
     fetchComplaint():Promise<any>
+    addCoupons(data:Coupons):Promise<string>
+    fetchCoupons(pageNumber:number):Promise<Coupons[]|string>
 
 
 }
@@ -28,3 +30,12 @@ export interface adminLoginSuccessResponse{
     refreshToken:string,
     status: number;
 }
+  export interface Coupons{
+    city:string|null,
+    code:string,
+    description:string,
+    validity:string|Date,
+    offerPercentage:string|number,
+    maxDiscount:string|number,
+    minPurchase:string|number
+  }

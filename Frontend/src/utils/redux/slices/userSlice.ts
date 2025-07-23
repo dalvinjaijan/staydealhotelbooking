@@ -88,8 +88,8 @@ const userSlice=createSlice({
                 },
 
                 saveBookingDetails:(state,action)=>{
-                    const {roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId,noOfDays}=action.payload
-                    state.bookingDetails={...state.bookingDetails,roomType,roomPrice,totalAmount,hotelName,hotelAddress,roomId,hotelId,userId,noOfDays}
+                    const {roomType,roomPrice,totalAmount,totalRoomPrice,discount,hotelName,hotelAddress,roomId,hotelId,userId,noOfDays}=action.payload
+                    state.bookingDetails={...state.bookingDetails,roomType,roomPrice,totalAmount,totalRoomPrice,discount,hotelName,hotelAddress,roomId,hotelId,userId,noOfDays}
                 },
                 saveGuestDetails:(state,action)=>{
                     const {name,email,phone,country}=action.payload

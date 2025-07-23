@@ -1,6 +1,6 @@
 import { Request as ExpressRequest,Response } from 'express';
 import { Session } from 'express-session';
-import { dataForBookingHotel, INotifyGetterResponse } from './iUserRepositoryInterface';
+import { dataForBookingHotel, INotifyGetterResponse, topRatedProps } from './iUserRepositoryInterface';
 
 export interface userInteractorInterface{
     sendOtp(email:string):Promise<string>
@@ -19,15 +19,23 @@ export interface userInteractorInterface{
     cancelLogic(bookingId:string,roomPolicies:{checkIn:string,checkOut :string},checkInDate:string,checkOutDate:string):Promise<any>
     rateTheHotel(data:{rating:number,review:string,bookingId:string,userId:string,hotelId:string}):Promise<any>
     reporthotel(data:{complaint:string,bookingId:string,userId:string,hotelId:string}):Promise<any>
+    getCoupon(city:string):Promise<any>
     notificationCountUpdater(id: string): Promise<{ count: number }>;
     notificationsGetter(
         id: string
     ): Promise<{ notfiyData: INotifyGetterResponse[] | [] }>;
+    getTopRatedHotels(latLng:latLng):Promise<topRatedProps[]|[]>
+    checkCoupon(code:string,purchaseAmount:number):Promise<any>
 
 }
 
 
+  export interface latLng{
 
+        lat:number,
+        lng:number
+    
+  }
 interface CustomSession extends Session {
   userEmailOtp?: string|null;
   userOtpTime?: number|null;
@@ -62,6 +70,8 @@ export interface bookingHotelDetails{
   hotelName:string,
   hotelAddress:string,
   roomPrice:number,
+  totalRoomPrice:number,
+  discount:number,
   totalAmount:number,
   roomType:string,
   name:string,

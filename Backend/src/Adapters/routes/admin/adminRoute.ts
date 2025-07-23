@@ -30,6 +30,11 @@ adminRouter.get('/fetchReport',verifyAccessToken('admin'),verifyRole(['admin']),
 
 adminRouter.get('/fetchComplaints',verifyAccessToken('admin'),verifyRole(['admin']),controller.fetchComplaints.bind(controller))
 
+//coupon
+adminRouter.post('/addCoupons',verifyAccessToken('admin'),verifyRole(['admin']),controller.addCoupon.bind(controller))
+adminRouter.get('/fetchCoupons',verifyAccessToken('admin'),verifyRole(['admin']),controller.fetchCoupon.bind(controller))
+
+
 
 
 

@@ -39,6 +39,10 @@ const userSchema= new mongoose.Schema({
    },
    walletTransaction:{
     type:[walletTransactionType]
+   },
+   coupons:{
+
+    type:[mongoose.Schema.Types.ObjectId],ref:"Coupon",default:[]
    }
 
 

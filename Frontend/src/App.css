@@ -7,6 +7,19 @@
   .scroll-element::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge */
   }
+  .hoverDiv{
+   transition: transform 0.3s ease; 
+    transform-origin: center;
+    will-change: transform;
+    border-radius: 0.5rem;
+    z-index: 30;
+  }
+ .hoverDiv:hover{
+  transform: scale(1.07);
+  border:3px solid #50B498;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 40
+ }
 
   .booking-success-container {
     display: flex;

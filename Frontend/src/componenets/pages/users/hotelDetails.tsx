@@ -107,7 +107,7 @@ const HotelDetails = () => {
         // No Reviews Message
         <p className="text-gray-500 text-center py-4">No reviews yet</p>
       ) : (
-        hotel.ratings.map((rating:any, index) => (
+        hotel.ratings.map((rating:any, index:number) => (
           <div key={index} className="flex items-start space-x-4 border-b pb-4 mb-4 last:border-b-0">
             {/* User Profile Image */}
             <img

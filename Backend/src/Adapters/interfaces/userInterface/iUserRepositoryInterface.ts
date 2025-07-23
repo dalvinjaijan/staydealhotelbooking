@@ -1,5 +1,5 @@
 import { Types,ObjectId } from "mongoose"
-import { bookingHotelDetails } from "./iUserInteractor"
+import { bookingHotelDetails, latLng } from "./iUserInteractor"
 
 export interface userRepositoryInterface{
     fetchNearByHotels(lat: number, lng: number): Promise<any>
@@ -26,9 +26,19 @@ export interface userRepositoryInterface{
         notfiyData: NotifyGetterResponse[] | [];
         countOfUnreadMessages: UnreadMessageCount[] | [];
     }>;
+    fetchTopRatedHotels(latLng:latLng):Promise<topRatedProps[]|[]>
+    fetchCoupons(city:string):Promise<any>
+    applyCoupon(code:string,purchaseAmount:number):Promise<any>
 
 
 }
+
+export interface topRatedProps{
+    hotelName:string;
+    address:string
+    hotelPhoto:string,
+    averageRatings:number|null
+  }
 
  export interface searchHotelsData{
     lngLat:{
